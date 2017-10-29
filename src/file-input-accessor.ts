@@ -94,7 +94,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
             for (let f of c.value) {
                 if (this.maxSize && this.maxSize < f.size) {
                     f.errors['fileSize'] = true;
-                    errors['fileSize'] = 'File size too large';
+                    errors['fileSize'] = true;
                 }
 
                 if (f.isImg && (this.maxWidth || this.maxHeight)) {
@@ -104,11 +104,11 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                             .map((e: ProgressEvent) => {
                                 if (this.maxWidth && f.imgWidth > this.maxWidth) {
                                     f.errors['imageWidth'] = true;
-                                    errors['imageWidth'] = 'Image is too wide';
+                                    errors['imageWidth'] = true;
                                 }
                                 if (this.maxHeight && f.imgHeight > this.maxHeight) {
                                     f.errors['imageHeight'] = true;
-                                    errors['imageHeight'] = 'Image is too tall';
+                                    errors['imageHeight'] = true;
                                 }
                                 return e;
                             })
@@ -122,7 +122,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
 
                 if ((extP && !extP.test(f.name)) || (typeP && !typeP.test(f.type))) {
                     f.errors['fileType'] = true;
-                    errors['fileType'] = 'File type not allowed';
+                    errors['fileType'] = true;
                 }
             }
             if (loaders.length) {
