@@ -7,8 +7,7 @@
     "transpile": "ngc",
     "package": "rollup -c",
     "minify": "uglifyjs dist/bundles/fileinput.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/fileinput.umd.min.js",
-    "build": "npm run transpile && npm run package && npm run minify",
-    "build:two": "rimraf dist && tsc -p tsconfig.json && rollup -c rollup.config.js dist/file-input.module.js > dist/file-input.bundle.js && cp package.json dist && ngc && cp readme.md dist"
+    "build": "rimraf dist && tsc -p tsconfig.json && rollup -c rollup.config.js dist/file-input.module.js > dist/file-input.bundle.js && cp package.json dist && ngc && cp readme.md dist"
   },
   "private": true,
   "dependencies": {
