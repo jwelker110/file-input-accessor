@@ -83,5 +83,13 @@ optional and only present if `withMeta` input is set to `true`.
     - `isImg` - `true`.
 * If the file's **type** is text:
     - `textContent` - The text content of the file.
+* Each file contains an `errors` property that contains an errors
+object. The following errors will be set `true` if the file has 
+failed that validation check.
+    - fileSize - File size is too large.
+    - fileType - File **type** failed to match.
+    - fileExt - File **extension** failed to match.
+    - imageWidth - Image is too wide.
+    - imageHeight - Image is too tall.
 
 
