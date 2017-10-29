@@ -1,0 +1,114 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1>FileInputAccessor demo</h1>
+      <p>Repo is <a href="https://github.com/jwelker110/angular-file-input-accessor">here</a>. Files
+        are logged to the console.
+      </p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <!--<h3>Add files</h3>-->
+      <p>Choose one or more files. They will not be uploaded. Form errors will appear in red.</p>
+    </div>
+    <div class="form-group col-sm-6" [formGroup]="form">
+      <label for="file" class="custom-file">
+        <input type="file" multiple
+               id="file"
+               class="custom-file-input"
+               name="file"
+               [size]="size"
+               [withMeta]="withMeta"
+               [allowedExt]="allowedFileExt"
+               [allowedTypes]="allowedFileTypes"
+               [maxWidth]="maxWidth"
+               [maxHeight]="maxHeight"
+               [formControl]="form.get('file')">
+        <span class="custom-file-control"></span>
+      </label>
+    </div>
+
+    <div class="col-sm-6">
+      <button class="btn btn-primary" (click)="removeFiles()">Clear files</button>
+    </div>
+
+    <div class="col-12 error-container">
+        <div [ngClass]="{'text-danger': form.get('file').hasError('fileType')}">File type not allowed.</div>
+        <div [ngClass]="{'text-danger': form.get('file').hasError('fileSize')}">File size exceeds maximum.</div>
+        <div [ngClass]="{'text-danger': form.get('file').hasError('imageWidth')}">Image too wide.</div>
+        <div [ngClass]="{'text-danger': form.get('file').hasError('imageHeight')}">Image too tall.</div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <input id="withMeta" type="checkbox" [formControl]="checkbox">
+        <label for="withMeta">Add file meta</label>
+      </div>
+    </div>
+    <div class="col-sm-6"></div>
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-form-label" for="size">Max file size (bytes)</label>
+        <input class="form-control" type="number" id="size" #sizeInput [value]="size">
+      </div>
+    </div>
+    <div class="col-sm-6"></div>
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-form-label" for="width">Max image width <span class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
+        <input class="form-control" type="number" [disabled]="!withMeta" id="width" #widthInput [value]="maxWidth">
+      </div>
+
+      <div class="form-group">
+        <label class="col-form-label" for="height">Max image height <span class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
+        <input class="form-control" type="number" [disabled]="!withMeta" id="height" #heightInput [value]="maxHeight">
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-form-label" for="typeRegEx">Allowed File <em>type</em> regex</label>
+        <input type="text" id="typeRegEx" #typeRegExInput class="form-control" [value]="allowedFileTypes">
+      </div>
+
+      <div class="form-group">
+        <label class="col-form-label" for="extRegEx">Allowed File <em>extension</em> regex</label>
+        <input type="text" id="extRegEx" #extRegExInput class="form-control" [value]="allowedFileExt">
+      </div>
+    </div>
+
+    <div class="col-12">
+      <button class="btn btn-primary"
+              (click)="updateValues(sizeInput.value, widthInput.value, heightInput.value, typeRegExInput.value, extRegExInput.value)">Update</button>
+    </div>
+
+  </div>
+
+  <div class="row">
+    <ng-container *ngFor="let file of fileList">
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="file-container">
+          <div><strong>{{file.name}}</strong></div>
+          <div><strong>{{file.size}} bytes</strong></div>
+          <div class="error-container">
+            <div [ngClass]="{'text-danger': file.errors['fileSize']}">File type not allowed</div>
+            <div [ngClass]="{'text-danger': file.errors['fileSize']}">File is too large</div>
+            <div [ngClass]="{'text-danger': file.errors['imageWidth']}">Image too wide</div>
+            <div [ngClass]="{'text-danger': file.errors['imageHeight']}">Image too tall</div>
+          </div>
+          <div class="file-contents">
+            <img *ngIf="file.imgSrc" [src]="file.imgSrc"/>
+            <p *ngIf="file.textContent" [innerHtml]="file.textContent"></p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
