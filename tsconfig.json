@@ -1,33 +1,19 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src/app/directives",
-    "declaration": true,
-    "stripInternal": true,
-    "experimentalDecorators": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "module": "es2015",
-    "moduleResolution": "node",
-    "paths": {
-      "@angular/forms": [
-        "node_modules/@angular/forms"
-      ]
-    },
-    "rootDir": ".",
-    "outDir": "dist",
-    "sourceMap": true,
-    "inlineSources": true,
     "target": "es5",
-    "skipLibCheck": true,
-    "lib": [
-      "es2015",
-      "dom"
-    ]
+    "module": "es2015",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "lib": ["es2015", "dom"]
   },
   "files": [
-    "index.ts"
+    "./lib/file-input.module.ts"
   ],
   "angularCompilerOptions": {
-    "strictMetadataEmit": true
+    "skipTemplateCodegen": true
   }
 }
