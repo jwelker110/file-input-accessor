@@ -1,8 +1,8 @@
 {
   "name": "file-input-accessor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Angular directive that provides file input functionality in Angular forms.",
-  "main": "bundles/fileinput.umd.js",
+  "main": "bundles/fileinputaccessor.umd.js",
   "module": "index.js",
   "typings": "index.d.ts",
   "keywords": [
