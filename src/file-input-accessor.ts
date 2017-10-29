@@ -120,7 +120,12 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                 let extP = this.generateRegExp(this.extPattern);
                 let typeP = this.generateRegExp(this.typePattern);
 
-                if ((extP && !extP.test(f.name)) || (typeP && !typeP.test(f.type))) {
+                if (extP && !extP.test(f.name)) {
+                    f.errors['fileExt'] = true;
+                    errors['fileExt'] = true;
+                }
+
+                if (typeP && !typeP.test(f.type)) {
                     f.errors['fileType'] = true;
                     errors['fileType'] = true;
                 }
@@ -157,8 +162,8 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
         };
     };
 
-    private generateRegExp(pattern: RegExp | string | string[]) {
-        if (!pattern) return;
+    private generateRegExp(pattern: RegExp | string | string[]): RegExp | null {
+        if (!pattern) return null;
 
         if (pattern instanceof RegExp) {
             return new RegExp(pattern);
@@ -167,6 +172,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
         } else if (pattern instanceof Array) {
             return new RegExp(`(${pattern.join('|')})`, 'ig');
         }
+        return null;
     }
 
     private generateFileMeta(f: ICustomFile, fr: FileReader) {
@@ -222,7 +228,3 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
         return onloadReplay;
     }
 }
-
-// export function forwardRefFunction(): Type<any> {
-//     return forwardRef(() => FileInputAccessor);
-// }

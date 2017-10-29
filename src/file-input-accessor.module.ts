@@ -8,7 +8,11 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
         FormsModule,
         ReactiveFormsModule
     ],
-    exports: [FileInputAccessor]
+    exports: [
+        FileInputAccessor,
+        FormsModule,
+        ReactiveFormsModule
+    ]
 })
 export class FileInputAccessorModule {
 }
