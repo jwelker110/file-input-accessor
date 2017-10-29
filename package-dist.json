@@ -7,6 +7,8 @@
   "typings": "index.d.ts",
   "keywords": [
     "angular",
+    "2",
+    "4",
     "angular2",
     "angular 2",
     "angular4",
@@ -16,7 +18,8 @@
     "template",
     "forms",
     "form",
-    "control"
+    "control",
+    "upload"
   ],
   "author": "jw",
   "license": "MIT",
