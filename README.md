@@ -2,7 +2,7 @@
 
 Angular (4+) file input accessor that can be used with 
 Reactive or Template-driven forms. Check out the 
-[demo](https://jwelker110.github.io/file-input-accessor-demo/).
+[demo](https://jwelker110.github.io/file-input-accessor/).
 
 #### Installation
 
