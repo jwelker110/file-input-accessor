@@ -1,14 +1,14 @@
 import {NgModule} from "@angular/core";
-import {FileInputDirective} from "./file-input.directive";
+import {FileInputAccessor} from "./file-input-accessor";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
-    declarations: [FileInputDirective],
+    declarations: [FileInputAccessor],
     imports: [
         FormsModule,
         ReactiveFormsModule
     ],
-    exports: [FileInputDirective]
+    exports: [FileInputAccessor]
 })
-export class FileInputModule {
+export class FileInputAccessorModule {
 }

@@ -1,4 +1,4 @@
-import {Directive, ElementRef, forwardRef, Input, OnChanges, Renderer2} from "@angular/core";
+import {Directive, ElementRef, forwardRef, Input, OnChanges, Renderer2, Type} from "@angular/core";
 import {
     AsyncValidator,
     AsyncValidatorFn,
@@ -20,18 +20,7 @@ import "rxjs/add/operator/mergeMap";
 import "rxjs/add/operator/take";
 import {Observable} from "rxjs/Observable";
 import {ReplaySubject} from "rxjs/ReplaySubject";
-
-
-export interface ICustomFile extends File {
-    errors?: {[key: string]: any};
-    imgSrc?: string;
-    imgHeight?: number;
-    imgWidth?: number;
-    isImg?: boolean;
-    imgLoadReplay?: ReplaySubject<[Event, ProgressEvent]>;
-    textContent?: string;
-    textLoadReplay?: ReplaySubject<[Event, ProgressEvent]>;
-}
+import {ICustomFile} from "./interfaces";
 
 
 @Directive({
@@ -40,17 +29,17 @@ export interface ICustomFile extends File {
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => FileInputDirective),
+            useExisting: forwardRef(() => FileInputAccessor),
             multi: true
         },
         {
             provide: NG_ASYNC_VALIDATORS,
-            useExisting: forwardRef(() => FileInputDirective),
+            useExisting: forwardRef(() => FileInputAccessor),
             multi: true
         }
     ]
 })
-export class FileInputDirective implements ControlValueAccessor, Validator, AsyncValidator, OnChanges {
+export class FileInputAccessor implements ControlValueAccessor, Validator, AsyncValidator, OnChanges {
     @Input('allowedExt') extPattern: RegExp | string | string[];
     @Input('allowedTypes') typePattern: RegExp | string | string[];
     @Input('size') maxSize: number;
@@ -233,3 +222,7 @@ export class FileInputDirective implements ControlValueAccessor, Validator, Asyn
         return onloadReplay;
     }
 }
+
+// export function forwardRefFunction(): Type<any> {
+//     return forwardRef(() => FileInputAccessor);
+// }

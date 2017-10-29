@@ -1,0 +1,36 @@
+{
+  "name": "file-input-accessor",
+  "version": "1.0.2",
+  "description": "Angular directive that provides file input functionality in Angular forms.",
+  "main": "bundles/fileinput.umd.js",
+  "module": "index.js",
+  "typings": "index.d.ts",
+  "keywords": [
+    "angular",
+    "angular2",
+    "angular 2",
+    "angular4",
+    "file",
+    "input",
+    "reactive",
+    "template",
+    "forms",
+    "form",
+    "control"
+  ],
+  "author": "jw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jwelker110/angular-file-input-accessor.git"
+  },
+  "homepage": "https://github.com/jwelker110/angular-file-input-accessor",
+  "bugs": {
+    "url": "https://github.com/jwelker110/angular-file-input-accessor"
+  },
+  "peerDependencies": {
+    "@angular/core": "^4.0.0",
+    "@angular/forms": "^4.0.0",
+    "rxjs": "^5.5.2"
+  }
+}

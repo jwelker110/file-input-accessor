@@ -1,31 +1,30 @@
 {
-  "name": "file-input-directive",
-  "version": "1.0.0",
+  "name": "file-input-accessor",
+  "version": "1.0.1",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
     "transpile": "ngc",
     "package": "rollup -c",
-    "minify": "uglifyjs dist/bundles/fileinput.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/fileinput.umd.min.js",
-    "build": "rimraf dist && tsc -p tsconfig.json && rollup -c rollup.config.js dist/file-input.module.js > dist/file-input.bundle.js && cp package.json dist && ngc && cp readme.md dist"
+    "minify": "uglifyjs dist/bundles/fileinputaccessor.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/fileinputaccessor.umd.min.js",
+    "build": "rimraf dist && npm run transpile && npm run package && npm run minify && cp package-dist.json dist/package.json && cp README.md dist/README.md",
+    "build:two": "rimraf dist && tsc -p tsconfig.json && rollup -c rollup.config.js file-inpute.module.js > file-input.bundle.js && cp package.json dist  && ngc && cp readme.md dist"
   },
   "private": true,
+  "bundleDependencies": false,
   "dependencies": {
-    "@angular/forms": "^4.2.4"
+    "@angular/forms": "^4.2.4",
+    "@angular/core": "^4.4.5",
+    "rxjs": "^5.5.2"
   },
   "devDependencies": {
     "@angular/cli": "1.4.4",
     "@angular/compiler": "^4.4.5",
     "@angular/compiler-cli": "^4.4.5",
-    "@angular/core": "^4.4.5",
     "rollup": "^0.50.0",
     "ts-node": "~3.2.0",
     "tslint": "~5.7.0",
     "typescript": "^2.3.4",
     "uglify-js": "^3.1.3"
-  },
-  "main": "file-input.bundle.js",
-  "module": "file-input.module.js",
-  "jsnext:main": "file-input.module.js",
-  "types": "file-input.module.d.ts"
+  }
 }

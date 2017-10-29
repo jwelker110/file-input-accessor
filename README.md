@@ -1,2 +1,2 @@
-# FileInputDirective
+# FileInputAccessor
 

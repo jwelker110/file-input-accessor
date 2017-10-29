@@ -1,2 +1,3 @@
-export {FileInputModule} from './lib/file-input.module';
-export {FileInputDirective} from './lib/file-input.directive';
+export * from './file-input-accessor';
+export * from './file-input-accessor.module';
+export * from './interfaces';
