@@ -36,6 +36,7 @@
 
     <div class="col-12 error-container">
         <div [ngClass]="{'text-danger': form.get('file').hasError('fileType')}">File type not allowed.</div>
+        <div [ngClass]="{'text-danger': form.get('file').hasError('fileExt')}">File extension not allowed.</div>
         <div [ngClass]="{'text-danger': form.get('file').hasError('fileSize')}">File size exceeds maximum.</div>
         <div [ngClass]="{'text-danger': form.get('file').hasError('imageWidth')}">Image too wide.</div>
         <div [ngClass]="{'text-danger': form.get('file').hasError('imageHeight')}">Image too tall.</div>
@@ -97,8 +98,10 @@
         <div class="file-container">
           <div><strong>{{file.name}}</strong></div>
           <div><strong>{{file.size}} bytes</strong></div>
+          <div *ngIf="file.isImg"><strong>{{file.imgWidth}}x{{file.imgHeight}}px</strong></div>
           <div class="error-container">
-            <div [ngClass]="{'text-danger': file.errors['fileSize']}">File type not allowed</div>
+            <div [ngClass]="{'text-danger': file.errors['fileType']}">File type not allowed</div>
+            <div [ngClass]="{'text-danger': file.errors['fileExt']}">File extension not allowed</div>
             <div [ngClass]="{'text-danger': file.errors['fileSize']}">File is too large</div>
             <div [ngClass]="{'text-danger': file.errors['imageWidth']}">Image too wide</div>
             <div [ngClass]="{'text-danger': file.errors['imageHeight']}">Image too tall</div>

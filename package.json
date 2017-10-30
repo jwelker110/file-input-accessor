@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
+    "start": "ng serve",
     "transpile": "ngc",
     "package": "rollup -c",
     "minify": "uglifyjs dist/bundles/fileinputaccessor.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/fileinputaccessor.umd.min.js",

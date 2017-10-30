@@ -71,7 +71,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 MIT
 MIT
 
-file-input-accessor@1.0.5
+file-input-accessor@1.0.6
 MIT
 MIT
 
