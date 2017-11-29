@@ -1,4 +1,4 @@
-import {Directive, ElementRef, forwardRef, Input, OnChanges, Renderer2, Type} from "@angular/core";
+import {Directive, ElementRef, forwardRef, Input, OnChanges, Renderer2} from "@angular/core";
 import {
     AsyncValidator,
     AsyncValidatorFn,
@@ -89,8 +89,8 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
         return (c: FormControl): Observable<ValidationErrors> => {
             if (!c.value || !c.value.length) return Observable.of({});
 
-            let errors: {[key: string]: any} = {};
-            let loaders: ReplaySubject<ProgressEvent>[] = [];
+            const errors: {[key: string]: any} = {};
+            const loaders: ReplaySubject<ProgressEvent>[] = [];
             for (let f of c.value) {
                 if (this.maxSize && this.maxSize < f.size) {
                     f.errors['fileSize'] = true;
@@ -117,8 +117,8 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
 
                 if (!this.extPattern && !this.typePattern) continue;
 
-                let extP = this.generateRegExp(this.extPattern);
-                let typeP = this.generateRegExp(this.typePattern);
+                const extP = this.generateRegExp(this.extPattern);
+                const typeP = this.generateRegExp(this.typePattern);
 
                 if (extP && !extP.test(f.name)) {
                     f.errors['fileExt'] = true;
@@ -143,7 +143,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
 
     private onChangeGenerator(fn: (_:any) => {}): (_: any) => {} {
         return (files: ICustomFile[]) => {
-            let fileArr: File[] = [];
+            const fileArr: File[] = [];
 
             if (!files || !files.length) {
                 this._renderer.setProperty(this._elementRef.nativeElement, 'value', []);
@@ -186,8 +186,8 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
     private setImage(f: ICustomFile, fr: FileReader): ReplaySubject<[Event, ProgressEvent]> {
         f.isImg = true;
 
-        let img = new Image();
-        let imgLoadObs = Observable.fromEvent(img, 'load')
+        const img = new Image();
+        const imgLoadObs = Observable.fromEvent(img, 'load')
             .take(1)
             .map((e: ProgressEvent) => {
                 f.imgHeight = img.height;
@@ -195,7 +195,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                 return e;
             });
 
-        let frLoadObs = Observable.fromEvent(fr, 'load')
+        const frLoadObs = Observable.fromEvent(fr, 'load')
             .take(1)
             .map((e: ProgressEvent) => {
                 f.imgSrc = fr.result;
@@ -203,7 +203,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                 return e;
             });
 
-        let onloadReplay = new ReplaySubject(1);
+        const onloadReplay = new ReplaySubject(1);
         Observable
             .forkJoin(
                 imgLoadObs,
@@ -218,6 +218,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
     private setText(f: ICustomFile, fr: FileReader): ReplaySubject<[Event, ProgressEvent]> {
         let onloadReplay = new ReplaySubject(1);
         Observable.fromEvent(fr, 'load')
+            .take(1)
             .map((e: ProgressEvent) => {
                 f.textContent = fr.result;
                 return [e];

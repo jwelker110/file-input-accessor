@@ -53,8 +53,8 @@ the control if at least one file fails validation:
 * fileSize - File size is too large.
 * fileType - File **type** failed to match.
 * fileExt - File **extension** failed to match.
-* imageWidth - Image is too wide.
-* imageHeight - Image is too tall.
+* imageWidth - Image is too wide (Requires `withMeta` set to `true`).
+* imageHeight - Image is too tall (Requires `withMeta` set to `true`).
 
 #### Accessor Inputs
 
@@ -67,7 +67,8 @@ All inputs are optional.
 * `[allowedTypes]` - Accepts the same as allowedExt but will be used to validate the file's **type**.
 * `[size]` - Used to verify each file's size does not exceed the provided value.
 * `[withMeta]` - If `true`, each file will receive additional properties 
-adhering to the ICustomFile interface.
+adhering to the ICustomFile interface. Required `true` to allow validating
+maxHeight and maxWidth.
 * `[maxHeight]` - The largest acceptable height, in pixels, for image files.
 * `[maxWidth]` - The largest acceptable width, in pixels, for image files.
 

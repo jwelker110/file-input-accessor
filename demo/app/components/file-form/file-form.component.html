@@ -56,7 +56,7 @@
     <div class="col-sm-6">
       <div class="form-group">
         <label class="col-form-label" for="size">Max file size (bytes)</label>
-        <input class="form-control" type="number" id="size" #sizeInput [value]="size">
+        <input class="form-control" type="number" step="1000" id="size" #sizeInput [value]="size">
       </div>
     </div>
     <div class="col-sm-6"></div>
@@ -87,7 +87,7 @@
 
     <div class="col-12">
       <button class="btn btn-primary"
-              (click)="updateValues(sizeInput.value, widthInput.value, heightInput.value, typeRegExInput.value, extRegExInput.value)">Update</button>
+              (click)="updateValues(sizeInput.value, widthInput.value, heightInput.value, typeRegExInput.value, extRegExInput.value)">Update Validation</button>
     </div>
 
   </div>
