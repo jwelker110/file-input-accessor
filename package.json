@@ -1,5 +1,5 @@
 {
-  "name": "file-input-directive",
+  "name": "file-input-accessor-demo",
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
@@ -20,13 +20,15 @@
     "@angular/forms": "^4.2.4",
     "@angular/platform-browser": "^4.2.4",
     "@angular/platform-browser-dynamic": "^4.2.4",
+    "codelyzer": "^4.1.0",
     "core-js": "^2.4.1",
-    "file-input-accessor": "^1.0.6",
-    "rxjs": "^5.4.2",
+    "file-input-accessor": "^1.0.9",
+    "rxjs": "5.5.6",
     "zone.js": "^0.8.14"
   },
   "devDependencies": {
-    "@angular/cli": "1.4.4",
+    "@angular-devkit/core": "0.0.29",
+    "@angular/cli": "1.5.3",
     "@angular/compiler-cli": "^4.2.4",
     "@angular/language-service": "^4.2.4",
     "@types/node": "~6.0.60",
