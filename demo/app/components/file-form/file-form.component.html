@@ -34,6 +34,10 @@
       <button class="btn btn-primary" (click)="removeFiles()">Clear files</button>
     </div>
 
+    <div class="col-12 info-container">
+        <div [ngClass]="{'text-info': form.pending}">Form is pending</div>
+    </div>
+
     <div class="col-12 error-container">
         <div [ngClass]="{'text-danger': form.get('file').hasError('fileType')}">File type not allowed.</div>
         <div [ngClass]="{'text-danger': form.get('file').hasError('fileExt')}">File extension not allowed.</div>
