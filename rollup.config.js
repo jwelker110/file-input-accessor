@@ -1,9 +1,11 @@
 export default {
-    entry: 'dist/index.js',
-    dest: 'dist/bundles/fileinputaccessor.umd.js',
+    input: 'dist/index.js',
+    output: {
+        file: 'dist/bundles/fileinputaccessor.umd.js',
+        format: 'umd'
+    },
     sourceMap: false,
-    format: 'umd',
-    moduleName: 'ng.fileinputaccessor',
+    name: 'ng.fileinputaccessor',
     globals: {
         '@angular/core': 'ng.core',
         '@angular/forms': 'ng.forms',
