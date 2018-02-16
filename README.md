@@ -4,6 +4,13 @@ Angular (4+) file input accessor that can be used with
 Reactive or Template-driven forms. Check out the 
 [demo](https://jwelker110.github.io/file-input-accessor/).
 
+Provides [NG_VALUE_ACCESSOR](https://angular.io/api/forms/NG_VALUE_ACCESSOR) 
+implementing the [ControlValueAccessor](https://angular.io/api/forms/ControlValueAccessor)
+interface.
+
+This package is derived from [this stack overflow answer](https://stackoverflow.com/questions/41889384/angular2-validation-for-input-type-file-wont-trigger-when-changing-the-fi/41938495#41938495)
+linked on [this issue](https://github.com/angular/angular/issues/7341).
+
 #### Installation
 
 1. Install package from npm
