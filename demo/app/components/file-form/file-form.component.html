@@ -14,7 +14,7 @@
       <p>Choose one or more files. They will not be uploaded. Form errors will appear in red.</p>
     </div>
     <div class="form-group col-sm-6" [formGroup]="form">
-      <label for="file" class="custom-file">
+      <div class="custom-file">
         <input type="file" multiple
                id="file"
                class="custom-file-input"
@@ -26,12 +26,14 @@
                [maxWidth]="maxWidth"
                [maxHeight]="maxHeight"
                [formControl]="form.get('file')">
-        <span class="custom-file-control"></span>
-      </label>
+        <label for="file" class="custom-file-label">Choose File</label>
+      </div>
     </div>
 
-    <div class="col-sm-6">
+    <div class="col-sm-6" [ngSwitch]="form.get('file').disabled">
       <button class="btn btn-primary" (click)="removeFiles()">Clear files</button>
+      <button *ngSwitchCase="false" class="btn btn-warning" (click)="disableFileControl()">Disable</button>
+      <button *ngSwitchCase="true" class="btn btn-success" (click)="enableFileControl()">Enable</button>
     </div>
 
     <div class="col-12 info-container">
@@ -59,8 +61,13 @@
 
     <div class="col-sm-6">
       <div class="form-group">
-        <label class="col-form-label" for="size">Max file size (bytes)</label>
-        <input class="form-control" type="number" step="1000" id="size" #sizeInput [value]="size">
+        <label class="col-form-label" for="size">Max file size</label>
+        <div class="input-group">
+          <input class="form-control" type="number" step="1000" id="size" #sizeInput [value]="size">
+          <div class="input-group-append">
+            <span class="input-group-text">bytes</span>
+          </div>
+        </div>
       </div>
     </div>
     <div class="col-sm-6"></div>
@@ -68,24 +75,56 @@
     <div class="col-sm-6">
       <div class="form-group">
         <label class="col-form-label" for="width">Max image width <span class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
-        <input class="form-control" type="number" [disabled]="!withMeta" id="width" #widthInput [value]="maxWidth">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><span class="fa fa-arrows-h"></span></span>
+          </div>
+          <input class="form-control" type="number" [disabled]="!withMeta" id="width" #widthInput [value]="maxWidth">
+          <div class="input-group-append">
+            <span class="input-group-text">px</span>
+          </div>
+        </div>
       </div>
 
       <div class="form-group">
         <label class="col-form-label" for="height">Max image height <span class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
-        <input class="form-control" type="number" [disabled]="!withMeta" id="height" #heightInput [value]="maxHeight">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><span class="fa fa-arrows-v"></span></span>
+          </div>
+          <input class="form-control" type="number" [disabled]="!withMeta" id="height" #heightInput [value]="maxHeight">
+          <div class="input-group-append">
+            <span class="input-group-text">px</span>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="col-sm-6">
       <div class="form-group">
         <label class="col-form-label" for="typeRegEx">Allowed File <em>type</em> regex</label>
-        <input type="text" id="typeRegEx" #typeRegExInput class="form-control" [value]="allowedFileTypes">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">/</span>
+          </div>
+          <input type="text" id="typeRegEx" #typeRegExInput class="form-control" [value]="allowedFileTypes" placeholder="ex. (text|jpe?g)">
+          <div class="input-group-append">
+            <span class="input-group-text">/</span>
+          </div>
+        </div>
       </div>
 
       <div class="form-group">
         <label class="col-form-label" for="extRegEx">Allowed File <em>extension</em> regex</label>
-        <input type="text" id="extRegEx" #extRegExInput class="form-control" [value]="allowedFileExt">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">/</span>
+          </div>
+          <input type="text" id="extRegEx" #extRegExInput class="form-control" [value]="allowedFileExt" placeholder="ex. (.txt|.jpe?g)">
+          <div class="input-group-append">
+            <span class="input-group-text">/</span>
+          </div>
+        </div>
       </div>
     </div>
 

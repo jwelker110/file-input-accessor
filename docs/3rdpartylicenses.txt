@@ -71,10 +71,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 MIT
 MIT
 
-file-input-accessor@1.0.9
-MIT
-MIT
-
 @angular/forms@4.4.5
 MIT
 MIT

@@ -49,23 +49,29 @@ export class FileFormComponent implements OnInit {
         this.form.get('file').setValue('');
     }
 
+    disableFileControl() {
+        this.form.get('file').disable();
+    }
+
+    enableFileControl() {
+        this.form.get('file').enable();
+    }
+
     updateSize(size: number) {
         this.size = size;
     }
 
     updateTypes(typeRegEx: string) {
         this.allowedFileTypes = typeRegEx;
-        this.allowedFileExt = null;
     }
 
     updateExt(extRegEx: string) {
         this.allowedFileExt = extRegEx;
-        this.allowedFileTypes = null;
     }
 
     updateDimensions(width: number, height: number) {
-        this.maxWidth = width ? width : null;
-        this.maxHeight = height ? height : null;
+        this.maxWidth = width;
+        this.maxHeight = height;
     }
 
     updateValues(size, width, height, typeRegEx, extRegEx) {

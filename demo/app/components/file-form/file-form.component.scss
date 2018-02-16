@@ -17,6 +17,11 @@ p {
   overflow: auto;
 }
 
+input[type=file]:disabled + .custom-file-label {
+  background-color: #d5d5d5;
+  border-color: #d5d5d5;
+}
+
 /*** custom checkboxes ***/
 
 input[type=checkbox] {
@@ -39,7 +44,6 @@ input[type=checkbox] + label:before {
 }
 
 /* space between checkbox and label */
-
 input[type=checkbox]:checked + label:before {
   content: "\f046";
 }
