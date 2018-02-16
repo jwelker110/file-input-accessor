@@ -1,4 +1,4 @@
-import {Directive, ElementRef, forwardRef, HostListener, Input, OnChanges, Renderer2} from '@angular/core';
+import {Directive, ElementRef, forwardRef, HostListener, Input, OnChanges, Renderer2, SimpleChanges} from '@angular/core';
 import {
     AsyncValidator,
     AsyncValidatorFn,
@@ -30,23 +30,23 @@ import {ICustomFile} from './interfaces';
     ]
 })
 export class FileInputAccessor implements ControlValueAccessor, Validator, AsyncValidator, OnChanges {
-    @Input('allowedExt') extPattern: RegExp | string | string[];
-    @Input('allowedTypes') typePattern: RegExp | string | string[];
-    @Input('size') maxSize: number;
-    @Input('withMeta') addMeta: boolean;
+    @Input('allowedExt') allowedExt: RegExp | string | string[];
+    @Input('allowedTypes') allowedTypes: RegExp | string | string[];
+    @Input('size') size: number;
+    @Input('withMeta') withMeta: boolean;
     @Input('maxHeight') maxHeight: number;
     @Input('maxWidth') maxWidth: number;
 
-    validator: AsyncValidatorFn;
-
     @HostListener('change', ['$event.target.files']) onChange = (_: any) => {};
     @HostListener('blur') onTouched = () => {};
+
+    validator: AsyncValidatorFn;
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef) {
         this.validator = this.generateAsyncValidator();
     }
 
-    ngOnChanges(changes: any) {
+    ngOnChanges(changes: SimpleChanges) {
         if (changes.fileList && changes.fileList.currentValue.length === 0) {
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', []);
         }
@@ -57,16 +57,14 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
         this._renderer.setProperty(this._elementRef.nativeElement, 'value', normalizedValue);
     }
 
-    registerOnChange(fn: any): void {
+    registerOnChange(fn: (_: any) => {}): void {
         this.onChange = this.onChangeGenerator(fn);
     }
 
-    registerOnTouched(fn: any): void {
-        this.onTouched = fn;
-    }
+    registerOnTouched(fn: () => {}): void {}
 
     setDisabledState(isDisabled: boolean): void {
-        throw new Error('Method not implemented.');
+        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
     }
 
     validate(c: FormControl): Observable<ValidationErrors> | Promise<ValidationErrors> {
@@ -75,13 +73,13 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
 
     private generateAsyncValidator(): (c: FormControl) => Observable<ValidationErrors> {
         return (c: FormControl): Observable<ValidationErrors> => {
-            if (!c.value || !c.value.length) return Observable.of({});
+            if (!c.value || !c.value.length || c.disabled) return Observable.of({});
 
-            const errors: { [key: string]: any } = {};
+            const errors: ValidationErrors = {};
             const loaders: ReplaySubject<ProgressEvent>[] = [];
 
             for (const f of c.value) {
-                if (this.maxSize && this.maxSize < f.size) {
+                if (this.size && this.size < f.size) {
                     f.errors['fileSize'] = true;
                     errors['fileSize'] = true;
                 }
@@ -105,10 +103,10 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                     );
                 }
 
-                if (!this.extPattern && !this.typePattern) continue;
+                if (!this.allowedExt && !this.allowedTypes) continue;
 
-                const extP = this.generateRegExp(this.extPattern);
-                const typeP = this.generateRegExp(this.typePattern);
+                const extP = this.generateRegExp(this.allowedExt);
+                const typeP = this.generateRegExp(this.allowedTypes);
 
                 if (extP && !extP.test(f.name)) {
                     f.errors['fileExt'] = true;
@@ -132,7 +130,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
         }
     };
 
-    private onChangeGenerator(fn: (_: any) => {}): (_: any) => {} {
+    private onChangeGenerator(fn: (_: any) => {}): (_: ICustomFile[]) => void {
         return (files: ICustomFile[]) => {
             const fileArr: File[] = [];
 
@@ -142,7 +140,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
             }
 
             for (const f of files) {
-                if (this.addMeta && FileReader) {
+                if (this.withMeta && FileReader) {
                     const fr = new FileReader();
                     this.generateFileMeta(f, fr);
                 }
