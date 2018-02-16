@@ -9,8 +9,12 @@ import {
     ValidationErrors,
     Validator
 } from '@angular/forms';
-import {Observable, ReplaySubject} from 'rxjs';
+import {Observable} from 'rxjs/Observable';
+import {forkJoin} from 'rxjs/observable/forkJoin';
+import {fromEvent} from 'rxjs/observable/fromEvent';
+import {of} from 'rxjs/observable/of';
 import {map, take} from 'rxjs/operators';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {ICustomFile} from './interfaces';
 
 
@@ -73,7 +77,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
 
     private generateAsyncValidator(): (c: FormControl) => Observable<ValidationErrors> {
         return (c: FormControl): Observable<ValidationErrors> => {
-            if (!c.value || !c.value.length || c.disabled) return Observable.of({});
+            if (!c.value || !c.value.length || c.disabled) return of({});
 
             const errors: ValidationErrors = {};
             const loaders: ReplaySubject<ProgressEvent>[] = [];
@@ -119,14 +123,13 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                 }
             }
             if (loaders.length) {
-                return Observable
-                    .forkJoin(...loaders)
+                return forkJoin(...loaders)
                     .pipe(
                         map(() => {
                             return errors;
                         }));
             }
-            return Observable.of(errors);
+            return of(errors);
         }
     };
 
@@ -176,8 +179,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
         f.isImg = true;
 
         const img = new Image();
-        const imgLoadObs = Observable
-            .fromEvent(img, 'load')
+        const imgLoadObs = fromEvent(img, 'load')
             .pipe(
                 take(1),
                 map((e: ProgressEvent) => {
@@ -186,8 +188,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                     return e;
                 }));
 
-        const frLoadObs = Observable
-            .fromEvent(fr, 'load')
+        const frLoadObs = fromEvent(fr, 'load')
             .pipe(
                 take(1),
                 map((e: ProgressEvent) => {
@@ -197,7 +198,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                 }));
 
         const onloadReplay = new ReplaySubject(1);
-        Observable.forkJoin(imgLoadObs, frLoadObs).subscribe(onloadReplay);
+        forkJoin(imgLoadObs, frLoadObs).subscribe(onloadReplay);
 
         fr.readAsDataURL(f);
 
@@ -206,8 +207,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
 
     private setText(f: ICustomFile, fr: FileReader): ReplaySubject<[Event, ProgressEvent]> {
         const onloadReplay = new ReplaySubject(1);
-        Observable
-            .fromEvent(fr, 'load')
+        fromEvent(fr, 'load')
             .pipe(
                 take(1),
                 map((e: ProgressEvent) => {

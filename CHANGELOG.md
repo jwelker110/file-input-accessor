@@ -9,3 +9,10 @@ removed deep operator imports in favor of [pipeable](https://github.com/Reactive
 * Add [setDisabledState()]() implementation.
 * Demo cleanup.
 * Refactor input properties to provide better completion.
+
+<a name="1.0.11"></a>
+# 1.0.11 (2018-02-16)
+* Fix an [error](https://github.com/angular/angular/issues/20095) when 
+importing directly from Rxjs.
+* **This will [change](https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#breaking-changes-1)
+in future versions (version 2.x) to keep best practices moving forward**
