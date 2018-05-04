@@ -1,13 +1,13 @@
 import {Directive, ElementRef, forwardRef, HostListener, Input, OnChanges, Renderer2, SimpleChanges} from '@angular/core';
 import {
+    AbstractControl,
     AsyncValidator,
     AsyncValidatorFn,
     ControlValueAccessor,
     FormControl,
     NG_ASYNC_VALIDATORS,
     NG_VALUE_ACCESSOR,
-    ValidationErrors,
-    Validator
+    ValidationErrors
 } from '@angular/forms';
 import {Observable} from 'rxjs/Observable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
@@ -33,13 +33,13 @@ import {ICustomFile} from './interfaces';
         }
     ]
 })
-export class FileInputAccessor implements ControlValueAccessor, Validator, AsyncValidator, OnChanges {
-    @Input('allowedExt') allowedExt: RegExp | string | string[];
-    @Input('allowedTypes') allowedTypes: RegExp | string | string[];
-    @Input('size') size: number;
-    @Input('withMeta') withMeta: boolean;
-    @Input('maxHeight') maxHeight: number;
-    @Input('maxWidth') maxWidth: number;
+export class FileInputAccessor implements ControlValueAccessor, AsyncValidator, OnChanges {
+    @Input() allowedExt: RegExp | string | string[];
+    @Input() allowedTypes: RegExp | string | string[];
+    @Input() size: number;
+    @Input() withMeta: boolean;
+    @Input() maxHeight: number;
+    @Input() maxWidth: number;
 
     @HostListener('change', ['$event.target.files']) onChange = (_: any) => {};
     @HostListener('blur') onTouched = () => {};
@@ -71,11 +71,11 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
         this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
     }
 
-    validate(c: FormControl): Observable<ValidationErrors> | Promise<ValidationErrors> {
+    validate(c: AbstractControl): Observable<ValidationErrors | null> | Promise<ValidationErrors | null> {
         return this.validator(c);
     }
 
-    private generateAsyncValidator(): (c: FormControl) => Observable<ValidationErrors> {
+    private generateAsyncValidator(): (c: FormControl) => Observable<ValidationErrors | null> {
         return (c: FormControl): Observable<ValidationErrors> => {
             if (!c.value || !c.value.length || c.disabled) return of({});
 
@@ -150,7 +150,7 @@ export class FileInputAccessor implements ControlValueAccessor, Validator, Async
                 f.errors = {};
                 fileArr.push(f);
             }
-            return fn(fileArr);
+            fn(fileArr);
         };
     };
 
