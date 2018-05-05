@@ -19,6 +19,7 @@ export class FileFormComponent implements OnInit {
     maxHeight = 360;
 
     form: FormGroup;
+    fileControl: FormControl;
 
     checkbox: FormControl;
 
@@ -26,11 +27,12 @@ export class FileFormComponent implements OnInit {
         this.form = _fb.group({
             file: ['']
         });
+        this.fileControl = <FormControl> this.form.get('file');
     }
 
     ngOnInit() {
         this.checkbox = new FormControl(this.withMeta);
-        this.form.get('file').valueChanges
+        this.fileControl.valueChanges
             .subscribe((val) => {
                 console.log('%c-----FILE LIST CHANGED-----', 'background-color: #008351; color: #fff');
                 console.log(val);
@@ -46,15 +48,15 @@ export class FileFormComponent implements OnInit {
     }
 
     removeFiles() {
-        this.form.get('file').setValue('');
+        this.fileControl.setValue([]);
     }
 
     disableFileControl() {
-        this.form.get('file').disable();
+        this.fileControl.disable();
     }
 
     enableFileControl() {
-        this.form.get('file').enable();
+        this.fileControl.enable();
     }
 
     updateSize(size: number) {
@@ -80,6 +82,10 @@ export class FileFormComponent implements OnInit {
         this.updateTypes(typeRegEx);
         this.updateExt(extRegEx);
         this.removeFiles();
+    }
+
+    changed($event) {
+        console.log($event);
     }
 }
 

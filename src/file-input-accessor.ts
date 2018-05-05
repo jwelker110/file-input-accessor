@@ -1,4 +1,4 @@
-import {Directive, ElementRef, forwardRef, HostListener, Input, OnChanges, Renderer2, SimpleChanges} from '@angular/core';
+import {Directive, ElementRef, forwardRef, HostListener, Input, Renderer2} from '@angular/core';
 import {
     AbstractControl,
     AsyncValidator,
@@ -33,7 +33,7 @@ import {ICustomFile} from './interfaces';
         }
     ]
 })
-export class FileInputAccessor implements ControlValueAccessor, AsyncValidator, OnChanges {
+export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
     @Input() allowedExt: RegExp | string | string[];
     @Input() allowedTypes: RegExp | string | string[];
     @Input() size: number;
@@ -50,15 +50,8 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator, 
         this.validator = this.generateAsyncValidator();
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes.fileList && changes.fileList.currentValue.length === 0) {
-            this._renderer.setProperty(this._elementRef.nativeElement, 'value', []);
-        }
-    }
-
     writeValue(value: any) {
-        const normalizedValue = value == null ? '' : value;
-        this._renderer.setProperty(this._elementRef.nativeElement, 'value', normalizedValue);
+        this._renderer.setProperty(this._elementRef.nativeElement, 'value', null);
     }
 
     registerOnChange(fn: (_: any) => {}): void {
@@ -123,11 +116,7 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator, 
                 }
             }
             if (loaders.length) {
-                return forkJoin(...loaders)
-                    .pipe(
-                        map(() => {
-                            return errors;
-                        }));
+                return forkJoin(...loaders).pipe(map(() => errors));
             }
             return of(errors);
         }
@@ -136,11 +125,6 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator, 
     private onChangeGenerator(fn: (_: any) => {}): (_: ICustomFile[]) => void {
         return (files: ICustomFile[]) => {
             const fileArr: File[] = [];
-
-            if (!files || !files.length) {
-                this._renderer.setProperty(this._elementRef.nativeElement, 'value', []);
-                return fn(fileArr);
-            }
 
             for (const f of files) {
                 if (this.withMeta && FileReader) {
