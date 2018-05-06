@@ -2,16 +2,21 @@
   <div class="row">
     <div class="col-12">
       <h1>FileInputAccessor demo</h1>
-      <p>Repo is <a href="https://github.com/jwelker110/angular-file-input-accessor">here</a>. Files
-        are logged to the console.
+      <p>
+        Adds Reactive and Template behavior you're used to using with Angular Forms, but for input[type="file"]. Sample
+        code for sending the files from Angular is in the
+        <a href="https://github.com/jwelker110/file-input-accessor#uploading-the-files" target="_blank">README</a>. The repo is
+        <a href="https://github.com/jwelker110/angular-file-input-accessor" target="_blank">here</a>. Files are logged to the console
+        if you want to see what gets emitted on change.
       </p>
+      <p><strong>For Angular 4 and 5, use version 1.x.x. For Angular 6 use version 2.x.x.</strong></p>
     </div>
   </div>
 
   <div class="row">
     <div class="col-12">
       <!--<h3>Add files</h3>-->
-      <p>Choose one or more files. They will not be uploaded. Form errors will appear in red.</p>
+      <p>Choose one or more files (they don't get uploaded anywhere). Validation errors are red.</p>
     </div>
     <div class="form-group col-sm-6" [formGroup]="form">
       <div class="custom-file">
@@ -139,9 +144,9 @@
     <ng-container *ngFor="let file of fileList">
       <div class="col-sm-6 col-md-4 col-lg-3">
         <div class="file-container">
-          <div><strong>{{file.name}}</strong></div>
-          <div><strong>{{file.size}} bytes</strong></div>
-          <div *ngIf="file.isImg"><strong>{{file.imgWidth}}x{{file.imgHeight}}px</strong></div>
+          <div>{{file.name}}</div>
+          <div>{{file.size}} bytes</div>
+          <div *ngIf="file.isImg">{{file.imgWidth}} x {{file.imgHeight}}px</div>
           <div class="error-container">
             <div [ngClass]="{'text-danger': file.errors['fileType']}">File type not allowed</div>
             <div [ngClass]="{'text-danger': file.errors['fileExt']}">File extension not allowed</div>

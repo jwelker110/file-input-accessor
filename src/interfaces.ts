@@ -1,4 +1,4 @@
-import {ReplaySubject} from 'rxjs/ReplaySubject';
+import {ReplaySubject} from 'rxjs';
 
 export interface ICustomFile extends File {
     errors?: {[key: string]: any};
@@ -8,5 +8,5 @@ export interface ICustomFile extends File {
     isImg?: boolean;
     imgLoadReplay?: ReplaySubject<[Event, ProgressEvent]>;
     textContent?: string;
-    textLoadReplay?: ReplaySubject<[Event, ProgressEvent]>;
+    textLoadReplay?: ReplaySubject<ProgressEvent>;
 }

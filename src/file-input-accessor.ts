@@ -9,12 +9,9 @@ import {
     NG_VALUE_ACCESSOR,
     ValidationErrors
 } from '@angular/forms';
-import {Observable} from 'rxjs/Observable';
-import {forkJoin} from 'rxjs/observable/forkJoin';
-import {fromEvent} from 'rxjs/observable/fromEvent';
-import {of} from 'rxjs/observable/of';
-import {map, take} from 'rxjs/operators';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
+
+import {forkJoin, fromEventPattern, Observable, of, ReplaySubject} from 'rxjs';
+import {first, map, shareReplay, take} from 'rxjs/operators';
 import {ICustomFile} from './interfaces';
 
 
@@ -68,7 +65,12 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
         return this.validator(c);
     }
 
-    private generateAsyncValidator(): (c: FormControl) => Observable<ValidationErrors | null> {
+    /**
+     * Generator method that I used to move the code for the AsyncValidator down here so it didn't
+     * get in my way, way up there ^.
+     * @returns {AsyncValidatorFn}
+     */
+    private generateAsyncValidator(): AsyncValidatorFn {
         return (c: FormControl): Observable<ValidationErrors> => {
             if (!c.value || !c.value.length || c.disabled) return of({});
 
@@ -122,6 +124,11 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
         }
     };
 
+    /**
+     * Generator method that returns an onChange handler
+     * @returns {(_: ICustomFile[]) => void}
+     * @param fn
+     */
     private onChangeGenerator(fn: (_: any) => {}): (_: ICustomFile[]) => void {
         return (files: ICustomFile[]) => {
             const fileArr: File[] = [];
@@ -151,6 +158,12 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
         return null;
     }
 
+    /**
+     * The ICustomFile has a ReplaySubject property for text / image files that will emit
+     * once the file has been loaded. Might get removed later since I haven't found a use for it yet.
+     * @param {ICustomFile} f
+     * @param {FileReader} fr
+     */
     private generateFileMeta(f: ICustomFile, fr: FileReader) {
         if (f.type.match(/text.*/)) {
             f.textLoadReplay = this.setText(f, fr);
@@ -163,42 +176,56 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
         f.isImg = true;
 
         const img = new Image();
-        const imgLoadObs = fromEvent(img, 'load')
-            .pipe(
-                take(1),
-                map((e: ProgressEvent) => {
-                    f.imgHeight = img.height;
-                    f.imgWidth = img.width;
-                    return e;
-                }));
 
-        const frLoadObs = fromEvent(fr, 'load')
-            .pipe(
-                take(1),
-                map((e: ProgressEvent) => {
-                    f.imgSrc = fr.result;
-                    img.src = fr.result;
-                    return e;
-                }));
+        const imgLoadObs = fromEventPattern<Event>(
+            ((handler: any)=> img.addEventListener('load', handler)),
+            ((handler: any) => img.removeEventListener('load', handler))
+        ).pipe(
+            take(1),
+            shareReplay()
+        );
 
-        const onloadReplay = new ReplaySubject(1);
-        forkJoin(imgLoadObs, frLoadObs).subscribe(onloadReplay);
+        const frLoadObs = fromEventPattern<ProgressEvent>(
+            ((handler: any) => fr.addEventListener('load', handler)),
+            ((handler: any) => fr.removeEventListener('load', handler))
+        ).pipe(
+            take(1),
+            shareReplay()
+        );
+
+        const onloadReplay = new ReplaySubject<[Event, ProgressEvent]>(1);
+        forkJoin(imgLoadObs, frLoadObs).pipe(first()).subscribe(onloadReplay);
+
+        imgLoadObs.pipe(first()).subscribe(() => {
+            f.imgHeight = img.height;
+            f.imgWidth = img.width;
+        });
+
+        frLoadObs.pipe(first()).subscribe(() => {
+            f.imgSrc = fr.result;
+            img.src = fr.result;
+        });
 
         fr.readAsDataURL(f);
 
         return onloadReplay;
     }
 
-    private setText(f: ICustomFile, fr: FileReader): ReplaySubject<[Event, ProgressEvent]> {
-        const onloadReplay = new ReplaySubject(1);
-        fromEvent(fr, 'load')
-            .pipe(
-                take(1),
-                map((e: ProgressEvent) => {
-                    f.textContent = fr.result;
-                    return [e];
-                }))
-            .subscribe(onloadReplay);
+    private setText(f: ICustomFile, fr: FileReader): ReplaySubject<ProgressEvent> {
+        const frLoadObs = fromEventPattern<ProgressEvent>(
+            ((handler: any) => fr.addEventListener('load', handler)),
+            ((handler: any ) => fr.removeEventListener('load', handler))
+        ).pipe(
+            take(1),
+            shareReplay()
+        );
+
+        const onloadReplay = new ReplaySubject<ProgressEvent>(1);
+        frLoadObs.subscribe(onloadReplay);
+
+        frLoadObs.pipe(first()).subscribe(() => {
+            f.textContent = fr.result;
+        });
 
         fr.readAsText(f);
 

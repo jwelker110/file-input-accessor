@@ -74,5 +74,7 @@ input[type=checkbox]:checked + label:before {
 
 .error-container,
 .info-container {
-  font-size: .9rem;
+  font-weight: bold;
+  color: #9E9E9E;
+  font-size: .9em;
 }

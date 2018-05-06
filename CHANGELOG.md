@@ -1,3 +1,11 @@
+# 2.0.0 (2018-05-05)
+* Updated demo and README - Added compatibility section and links 
+to [Rxjs](https://beta-rxjsdocs.firebaseapp.com/) docs.
+
+### Breaking Changes
+* Using Angular v6, which means Rxjs v6, which means if your project
+is using Angular v4 or v5, you should stick to FileInputAccessor v1.x.x
+
 # 1.0.12 (2018-05-05)
 * README.md - Added example code for uploading files
 * Dependencies - Updated so they actually reflect the Angular versions this is compatible with. Version 1.x.x works with Angular >=4.0.0 <6.0.0

@@ -2,31 +2,45 @@ Looking for the [changelog](https://github.com/jwelker110/file-input-accessor/bl
 
 # FileInputAccessor
 
-Angular file input accessor that can be used with 
-Reactive or Template-driven forms. Check out the 
-[demo](https://jwelker110.github.io/file-input-accessor/).
+Adds Reactive and Template behavior you're used to using with Angular Forms, but for `<input type="file">`. Check out the [demo](https://jwelker110.github.io/file-input-accessor/) to see it in action. 
+
+Sample code for sending the files from Angular to your backend is [further down](https://github.com/jwelker110/file-input-accessor#uploading-the-files) this page. 
 
 Provides [NG_VALUE_ACCESSOR](https://angular.io/api/forms/NG_VALUE_ACCESSOR) implementing the [ControlValueAccessor](https://angular.io/api/forms/ControlValueAccessor)
-interface.
-
-This package is derived from [this stack overflow answer](https://stackoverflow.com/questions/41889384/angular2-validation-for-input-type-file-wont-trigger-when-changing-the-fi/41938495#41938495)
+interface. For more info, refer to [this stack overflow answer](https://stackoverflow.com/questions/41889384/angular2-validation-for-input-type-file-wont-trigger-when-changing-the-fi/41938495#41938495)
 linked on [this issue](https://github.com/angular/angular/issues/7341).
 
+- [Which version should I use?](#compatibility)
 - [Installation](#installation)
 - [Using in your form](#using-in-your-form)
 - [Validation](#validation)
 - [Accessor Inputs](#accessor-inputs)
 - [ICustomFile](#icustomfile)
 
-#### Using with your forms
+## Which version should I use?
 
-1. Install package from npm
-    ```
-    npm i file-input-accessor
-    ```
+**Version 1.x.x uses [Rxjs](https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md) v5.5.x.** Rxjs v6 underwent some changes that include adjustments to the way operators are imported along with other [breaking changes](https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#600-alpha1-2018-01-12). 
+
+**Version 2.x.x uses Rxjs v6.** If you're interested in updating your projects, [a package](https://www.npmjs.com/package/rxjs-compat) has been created for that very purpose by the Rxjs team.
+
+As a general rule:
+
+- For Angular 4 and 5, use version 1.x.x.
+- For Angular 6 use version 2.x.x.
+
+#### Rxjs
+
+Rxjs is awesome. Their [docs](https://beta-rxjsdocs.firebaseapp.com/) (beta as of 2018/05/05). [Another](https://www.learnrxjs.io/operators/) very helpful resource to familiarize yourself with Rxjs by providing a list of commonly used operators with examples.
+
+## Using with your forms
+
+1. Install package from npm 
+   
+   ```npm i file-input-accessor```
 
 2. Import the FileInputAccessorModule.
-    ```typescript
+    
+   ```typescript
     import {BrowserModule} from '@angular/platform-browser';
     import {FileInputAccessorModule} from "file-input-accessor";
 
@@ -42,11 +56,11 @@ linked on [this issue](https://github.com/angular/angular/issues/7341).
         bootstrap: [AppComponent]
     })
     export class AppModule {}
-    ```
+   ```
 
 3. That's it. You can use FormControl and NgModel with your file input.
 
-    ```angular2html
+   ```angular2html
     <!--file-upload.component.html-->
 
     <form>
@@ -64,12 +78,12 @@ linked on [this issue](https://github.com/angular/angular/issues/7341).
       <input type="file" multiple [(ngModel)]="manualChangesFiles" name="templateFileUploadControl2">
       <button type="button" (click)="submitFiles()">Click to upload</button>
     </form>
-    ```
+   ```
 
-#### Uploading the files
+## Uploading the files
 1. Import the [HttpClientModule](https://angular.io/api/common/http/HttpClientModule) if it isn't already.
 
-    ```typescript
+   ```typescript
     @NgModule({
         declarations: [
             AppComponent,
@@ -86,11 +100,11 @@ linked on [this issue](https://github.com/angular/angular/issues/7341).
     })
     export class AppModule {
     }
-    ```
+   ```
 
 2. When you're ready to upload your files, append them to your [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) and use [HttpClient](https://angular.io/api/common/http/HttpClient) to call your file upload endpoint.
 
-    ```typescript
+   ```typescript
     @Component({
         selector: 'app-file-upload',
         templateUrl: './file-upload.component.html',
@@ -153,9 +167,9 @@ linked on [this issue](https://github.com/angular/angular/issues/7341).
             return this._http.post('/api/files', data);
         }
     }
-    ```
+   ```
 
-#### Validation
+## Validation
 An async validator is included and only runs if sync validation passes and values are provided to the accessor inputs. The following errors may be set `true` on the control if at least one file fails validation:
 
 * fileSize - File size is too large.
@@ -164,7 +178,7 @@ An async validator is included and only runs if sync validation passes and value
 * imageWidth - Image is too wide (Requires `withMeta` set to `true`).
 * imageHeight - Image is too tall (Requires `withMeta` set to `true`).
 
-#### Accessor Inputs
+## Accessor Inputs
 
 All inputs are optional.
 
@@ -178,7 +192,7 @@ All inputs are optional.
 * `[maxHeight]` - The largest acceptable height, in pixels, for image files.
 * `[maxWidth]` - The largest acceptable width, in pixels, for image files.
 
-#### ICustomFile
+## ICustomFile
 
 An interface implemented by the Files added to the control. All properties are 
 optional and only present if `withMeta` input is set to `true`.
