@@ -10,7 +10,7 @@ Provides [NG_VALUE_ACCESSOR](https://angular.io/api/forms/NG_VALUE_ACCESSOR) imp
 interface. For more info, refer to [this stack overflow answer](https://stackoverflow.com/questions/41889384/angular2-validation-for-input-type-file-wont-trigger-when-changing-the-fi/41938495#41938495)
 linked on [this issue](https://github.com/angular/angular/issues/7341).
 
-- [Which version should I use?](#compatibility)
+- [Which version should I use?](#which-version-should-i-use)
 - [Installation](#installation)
 - [Using in your form](#using-in-your-form)
 - [Validation](#validation)
