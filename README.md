@@ -4,7 +4,7 @@ Looking for the [changelog](https://github.com/jwelker110/file-input-accessor/bl
 
 Adds Reactive and Template behavior you're used to using with Angular Forms, but for `<input type="file">`. Check out the [demo](https://jwelker110.github.io/file-input-accessor/) to see it in action. 
 
-Sample code for sending the files from Angular to your backend is [further down](https://github.com/jwelker110/file-input-accessor#uploading-the-files) this page. 
+Sample code for sending the files from Angular to your backend is [further down](#uploading-the-files) this page. 
 
 Provides [NG_VALUE_ACCESSOR](https://angular.io/api/forms/NG_VALUE_ACCESSOR) implementing the [ControlValueAccessor](https://angular.io/api/forms/ControlValueAccessor)
 interface. For more info, refer to [this stack overflow answer](https://stackoverflow.com/questions/41889384/angular2-validation-for-input-type-file-wont-trigger-when-changing-the-fi/41938495#41938495)
