@@ -1,3 +1,8 @@
+# 2.0.1 (2018-10-15)
+* Validation when using string or array doesn't match against file extension correctly. 
+This matches against the end of the filenames by appending `$` to the end of the string or 
+string array Regex.
+
 # 2.0.0 (2018-05-05)
 * Updated demo and README - Added compatibility section and links 
 to [Rxjs](https://beta-rxjsdocs.firebaseapp.com/) docs.
