@@ -11,7 +11,7 @@
     "build": "rimraf dist && npm run transpile && npm run package && npm run minify && cp package-dist.json dist/package.json && cp README.md dist/README.md",
     "build:demo": "ng build --prod --base-href file-input-accessor-demo && cp docs/index.html docs/404.html"
   },
-  "private": true,
+  "private": false,
   "bundleDependencies": false,
   "dependencies": {
     "@angular/common": "^4.2.4",

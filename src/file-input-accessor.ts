@@ -34,17 +34,37 @@ import {ICustomFile} from './interfaces';
     ]
 })
 export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
-    @Input() allowedExt: RegExp | string | string[];
     @Input() allowedTypes: RegExp | string | string[];
+
     @Input() size: number;
+
     @Input() withMeta: boolean;
+
     @Input() maxHeight: number;
+
     @Input() maxWidth: number;
+
+    @Input()
+    set allowedExt(value: RegExp | string | string[]) {
+        if (typeof value === 'string') {
+            value = value + '$';
+        }
+        if (value instanceof Array) {
+            value = value.join('|') + '$';
+        }
+        this._allowedExt = value;
+    }
+
+    get allowedExt(): RegExp | string | string[] {
+        return this._allowedExt;
+    }
+
+    validator: AsyncValidatorFn;
+
+    private _allowedExt: RegExp | string | string[];
 
     @HostListener('change', ['$event.target.files']) onChange = (_: any) => {};
     @HostListener('blur') onTouched = () => {};
-
-    validator: AsyncValidatorFn;
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef) {
         this.validator = this.generateAsyncValidator();
@@ -181,7 +201,7 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
                     return e;
                 }));
 
-        const onloadReplay = new ReplaySubject(1);
+        const onloadReplay = new ReplaySubject<[Event, ProgressEvent]>(1);
         forkJoin(imgLoadObs, frLoadObs).subscribe(onloadReplay);
 
         fr.readAsDataURL(f);
@@ -189,8 +209,8 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
         return onloadReplay;
     }
 
-    private setText(f: ICustomFile, fr: FileReader): ReplaySubject<[Event, ProgressEvent]> {
-        const onloadReplay = new ReplaySubject(1);
+    private setText(f: ICustomFile, fr: FileReader): ReplaySubject<[ProgressEvent]> {
+        const onloadReplay = new ReplaySubject<[ProgressEvent]>(1);
         fromEvent(fr, 'load')
             .pipe(
                 take(1),

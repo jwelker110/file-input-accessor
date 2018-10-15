@@ -8,5 +8,5 @@ export interface ICustomFile extends File {
     isImg?: boolean;
     imgLoadReplay?: ReplaySubject<[Event, ProgressEvent]>;
     textContent?: string;
-    textLoadReplay?: ReplaySubject<[Event, ProgressEvent]>;
+    textLoadReplay?: ReplaySubject<[ProgressEvent]>;
 }

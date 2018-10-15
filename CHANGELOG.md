@@ -1,3 +1,6 @@
+# 1.0.13 (2018-10-15)
+* Validation when using string or array doesn't match against file extension correctly
+
 # 1.0.12 (2018-05-05)
 * README.md - Added example code for uploading files
 * Dependencies - Updated so they actually reflect the Angular versions this is compatible with. Version 1.x.x works with Angular >=4.0.0 <6.0.0
