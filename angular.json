@@ -3,30 +3,38 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "file-input-accessor-demo": {
+    "file-input": {
       "root": "",
-      "sourceRoot": "demo",
+      "sourceRoot": "src",
       "projectType": "application",
+      "prefix": "app",
+      "schematics": {},
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "docs",
-            "index": "demo/index.html",
-            "main": "demo/main.ts",
-            "tsConfig": "demo/tsconfig.app.json",
-            "polyfills": "demo/polyfills.ts",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "src/tsconfig.app.json",
             "assets": [
-              "demo/assets",
-              "demo/favicon.ico"
+              "src/favicon.png",
+              "src/assets"
             ],
             "styles": [
-              "demo/styles.scss"
+              "src/styles.scss"
             ],
             "scripts": []
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -35,51 +43,125 @@
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "demo/environments/environment.ts",
-                  "with": "demo/environments/environment.prod.ts"
-                }
-              ]
+              "buildOptimizer": true
             }
           }
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "file-input-accessor-demo:build"
+            "browserTarget": "file-input:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "file-input-accessor-demo:build:production"
+              "browserTarget": "file-input:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "file-input-accessor-demo:build"
+            "browserTarget": "file-input:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/test.ts",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "src/tsconfig.spec.json",
+            "karmaConfig": "src/karma.conf.js",
+            "styles": [
+              "src/styles.css"
+            ],
+            "scripts": [],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ]
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [],
-            "exclude": []
+            "tsConfig": [
+              "src/tsconfig.app.json",
+              "src/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "file-input-e2e": {
+      "root": "e2e/",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "e2e/protractor.conf.js",
+            "devServerTarget": "file-input:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "file-input:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": "e2e/tsconfig.e2e.json",
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "file-input-accessor": {
+      "root": "projects/file-input-accessor",
+      "sourceRoot": "projects/file-input-accessor/src",
+      "projectType": "library",
+      "prefix": "os",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/file-input-accessor/tsconfig.lib.json",
+            "project": "projects/file-input-accessor/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "project": "projects/file-input-accessor/ng-package.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/file-input-accessor/src/test.ts",
+            "tsConfig": "projects/file-input-accessor/tsconfig.spec.json",
+            "karmaConfig": "projects/file-input-accessor/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/file-input-accessor/tsconfig.lib.json",
+              "projects/file-input-accessor/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
           }
         }
       }
     }
   },
-  "defaultProject": "file-input-accessor-demo",
-  "schematics": {
-    "@schematics/angular:component": {
-      "prefix": "app",
-      "styleext": "scss"
-    },
-    "@schematics/angular:directive": {
-      "prefix": "app"
-    }
-  }
+  "defaultProject": "file-input"
 }

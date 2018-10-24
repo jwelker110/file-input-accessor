@@ -1,0 +1,172 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1>FileInputAccessor demo</h1>
+      <p>
+        Adds Reactive and Template behavior you're used to using with Angular Forms, but for input[type="file"]. Sample
+        code for sending the files from Angular is in the
+        <a href="https://github.com/jwelker110/file-input-accessor#uploading-the-files" target="_blank">README</a>. The
+        repo is
+        <a href="https://github.com/jwelker110/angular-file-input-accessor" target="_blank">here</a>. Files are logged
+        to the console
+        if you want to see what gets emitted on change.
+      </p>
+      <p><strong>For Angular 4 and 5, use version 1.x.x. For Angular 6 use version 2.x.x. Angular 7 and above aligns
+                 with the Angular version, so for Angular 7, use 7.x.x, Angular 8, use 8.x.x, etc..</strong></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <!--<h3>Add files</h3>-->
+      <p>Choose one or more files (they don't get uploaded anywhere). Validation errors are red.</p>
+    </div>
+    <div class="form-group col-sm-6" [formGroup]="form">
+      <div class="custom-file">
+        <input type="file" multiple
+               id="file"
+               class="custom-file-input"
+               name="file"
+               [size]="size"
+               [withMeta]="withMeta"
+               [allowedExt]="allowedFileExt"
+               [allowedTypes]="allowedFileTypes"
+               [maxWidth]="maxWidth"
+               [maxHeight]="maxHeight"
+               [formControl]="form.get('file')">
+        <label for="file" class="custom-file-label">Choose File</label>
+      </div>
+    </div>
+
+    <div class="col-sm-6" [ngSwitch]="form.get('file').disabled">
+      <button class="btn btn-primary" (click)="removeFiles()">Clear files</button>
+      <button *ngSwitchCase="false" class="btn btn-warning" (click)="disableFileControl()">Disable</button>
+      <button *ngSwitchCase="true" class="btn btn-success" (click)="enableFileControl()">Enable</button>
+    </div>
+
+    <div class="col-12 info-container">
+      <div [ngClass]="{'text-info': form.pending}">Form is pending</div>
+    </div>
+
+    <div class="col-12 error-container">
+      <div [ngClass]="{'text-danger': form.get('file').hasError('fileType')}">File type not allowed.</div>
+      <div [ngClass]="{'text-danger': form.get('file').hasError('fileExt')}">File extension not allowed.</div>
+      <div [ngClass]="{'text-danger': form.get('file').hasError('fileSize')}">File size exceeds maximum.</div>
+      <div [ngClass]="{'text-danger': form.get('file').hasError('imageWidth')}">Image too wide.</div>
+      <div [ngClass]="{'text-danger': form.get('file').hasError('imageHeight')}">Image too tall.</div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <input id="withMeta" type="checkbox" [formControl]="checkbox">
+        <label for="withMeta">Add file meta</label>
+      </div>
+    </div>
+    <div class="col-sm-6"></div>
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-form-label" for="size">Max file size</label>
+        <div class="input-group">
+          <input class="form-control" type="number" step="1000" id="size" #sizeInput [value]="size">
+          <div class="input-group-append">
+            <span class="input-group-text">bytes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6"></div>
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-form-label" for="width">Max image width <span class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><span class="fa fa-arrows-h"></span></span>
+          </div>
+          <input class="form-control" type="number" [disabled]="!withMeta" id="width" #widthInput [value]="maxWidth">
+          <div class="input-group-append">
+            <span class="input-group-text">px</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-form-label" for="height">Max image height <span class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><span class="fa fa-arrows-v"></span></span>
+          </div>
+          <input class="form-control" type="number" [disabled]="!withMeta" id="height" #heightInput [value]="maxHeight">
+          <div class="input-group-append">
+            <span class="input-group-text">px</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-form-label" for="typeRegEx">Allowed File <em>type</em> regex</label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">/</span>
+          </div>
+          <input type="text" id="typeRegEx" #typeRegExInput class="form-control" [value]="allowedFileTypes"
+                 placeholder="ex. (text|jpe?g)">
+          <div class="input-group-append">
+            <span class="input-group-text">/</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-form-label" for="extRegEx">Allowed File <em>extension</em> regex</label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">/</span>
+          </div>
+          <input type="text" id="extRegEx" #extRegExInput class="form-control" [value]="allowedFileExt"
+                 placeholder="ex. (.txt|.jpe?g)">
+          <div class="input-group-append">
+            <span class="input-group-text">/</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <button class="btn btn-primary"
+              (click)="updateValues(sizeInput.value, widthInput.value, heightInput.value, typeRegExInput.value, extRegExInput.value)">
+        Update Validation
+      </button>
+    </div>
+
+  </div>
+
+  <div class="row">
+    <ng-container *ngFor="let file of fileList">
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="file-container">
+          <div>{{file.name}}</div>
+          <div>{{file.size}} bytes</div>
+          <div *ngIf="file.isImg">{{file.imgWidth}} x {{file.imgHeight}}px</div>
+          <div class="error-container">
+            <div [ngClass]="{'text-danger': file.errors['fileType']}">File type not allowed</div>
+            <div [ngClass]="{'text-danger': file.errors['fileExt']}">File extension not allowed</div>
+            <div [ngClass]="{'text-danger': file.errors['fileSize']}">File is too large</div>
+            <div [ngClass]="{'text-danger': file.errors['imageWidth']}">Image too wide</div>
+            <div [ngClass]="{'text-danger': file.errors['imageHeight']}">Image too tall</div>
+          </div>
+          <div class="file-contents">
+            <img *ngIf="file.imgSrc" [src]="file.imgSrc" />
+            <p *ngIf="file.textContent" [innerHtml]="file.textContent"></p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

@@ -1,6 +1,6 @@
 Looking for the [changelog](https://github.com/jwelker110/file-input-accessor/blob/master/CHANGELOG.md)?
 
-#### If you see an error about an unknown token `{` with some imports.
+#### (Versions < 2.0.1) If you see an error about an unknown token `{` with some imports.
 
 This isn't compatible with Angular Universal (Server side rendering) yet. I'll fix this in a future release. Until then, if you need to server-side render this package, please refer to the instructions [here](https://github.com/SebastianM/angular-google-maps/issues/1052#issuecomment-331150772). Summarized below:
 
@@ -19,8 +19,6 @@ This isn't compatible with Angular Universal (Server side rendering) yet. I'll f
     ```json
     "postinstall": "compile:file-input-accessor"
     ```
-
-I'll fix this in the near future.
 
 # FileInputAccessor
 
@@ -49,6 +47,7 @@ As a general rule:
 
 - For Angular 4 and 5, use version 1.x.x.
 - For Angular 6 use version 2.x.x.
+- Angular 7 and above aligns with the Angular version, so for Angular 7, use 7.x.x, Angular 8, use 8.x.x, etc..
 
 #### Rxjs
 
