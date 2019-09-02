@@ -1,3 +1,6 @@
+# 8.1.1 (2019-09-02)
+* Fix a bug where min validation was not performed if max constraints were not set.
+
 # 8.1.0 (2019-09-02)
 * Add minHeight and minWidth validation for images. Closing [#4](https://github.com/jwelker110/file-input-accessor/issues/4).
 * Add maxHeight, maxWidth, minHeight, and minWidth properties to errors object.

@@ -106,7 +106,7 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
                     errors.fileSize = true;
                 }
 
-                if (f.isImg && (this.maxWidth || this.maxHeight)) {
+                if (f.isImg && (this.maxWidth || this.maxHeight || this.minWidth || this.minHeight)) {
                     loaders.push(
                         f.imgLoadReplay
                             .pipe(

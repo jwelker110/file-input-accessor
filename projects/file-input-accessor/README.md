@@ -243,6 +243,6 @@ failed that validation check.
     - (>= 8.1.0) maxHeight - Image is too tall.
     - (>= 8.1.0) maxWidth - Image is too wide.
     - (>= 8.1.0) minHeight - Image is not tall enough.
-    - (>= 8.1.0) minWidth - Image is not wide enough
+    - (>= 8.1.0) minWidth - Image is not wide enough.
 
 
