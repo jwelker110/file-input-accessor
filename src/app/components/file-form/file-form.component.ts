@@ -17,6 +17,8 @@ export class FileFormComponent implements OnInit {
     size = 50000;
     maxWidth = 480;
     maxHeight = 360;
+    minWidth = 400;
+    minHeight = 300;
 
     form: FormGroup;
     fileControl: FormControl;
@@ -71,14 +73,16 @@ export class FileFormComponent implements OnInit {
         this.allowedFileExt = extRegEx;
     }
 
-    updateDimensions(width: number, height: number) {
-        this.maxWidth = width;
-        this.maxHeight = height;
+    updateDimensions(maxWidth: number, maxHeight: number, minWidth: number, minHeight: number) {
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
+        this.minWidth = minWidth;
+        this.minHeight = minHeight;
     }
 
-    updateValues(size, width, height, typeRegEx, extRegEx) {
+    updateValues(size, maxWidth, maxHeight, minWidth, minHeight, typeRegEx, extRegEx) {
         this.updateSize(size);
-        this.updateDimensions(width, height);
+        this.updateDimensions(maxWidth, maxHeight, minWidth, minHeight);
         this.updateTypes(typeRegEx);
         this.updateExt(extRegEx);
         this.removeFiles();

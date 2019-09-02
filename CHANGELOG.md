@@ -1,3 +1,11 @@
+# 8.1.0 (2019-09-02)
+* Add minHeight and minWidth validation for images. Closing [#4](https://github.com/jwelker110/file-input-accessor/issues/4).
+* Add maxHeight, maxWidth, minHeight, and minWidth properties to errors object.
+* imageWidth and imageHeight properties now reflect validation errors for their counterparts (maxWidth, minWidth for imageWidth, maxHeight, minHeight for imageHeight)
+
+# 8.0.0 (2019-05-29)
+* Update to Angular v8.
+
 # 7.0.0 (2018-10-23)
 * Update to Angular v7. Major versions will align with major Angular versions moving forward.
 * Compatible with Angular SSR (Server Side Rendering) since version 2.0.1.

@@ -49,9 +49,9 @@ As a general rule:
 - For Angular 6 use version 2.x.x.
 - Angular 7 and above aligns with the Angular version, so for Angular 7, use 7.x.x, Angular 8, use 8.x.x, etc..
 
-#### Rxjs
+#### RxJS
 
-Rxjs is awesome. Their [docs](https://beta-rxjsdocs.firebaseapp.com/) (beta as of 2018/05/05). [Another](https://www.learnrxjs.io/operators/) very helpful resource to familiarize yourself with Rxjs by providing a list of commonly used operators with examples.
+RxJS [docs](https://beta-rxjsdocs.firebaseapp.com/) (beta as of 2018/05/05). [Another](https://www.learnrxjs.io/operators/) very helpful resource to familiarize yourself with Rxjs by providing a list of commonly used operators with examples.
 
 ## Using with your forms
 
@@ -196,8 +196,13 @@ An async validator is included and only runs if sync validation passes and value
 * fileSize - File size is too large.
 * fileType - File **type** failed to match.
 * fileExt - File **extension** failed to match.
-* imageWidth - Image is too wide (Requires `withMeta` set to `true`).
-* imageHeight - Image is too tall (Requires `withMeta` set to `true`).
+* The image validation requires `withMeta` set to `true`.
+    * imageWidth - Image does not meet width requirement.
+    * imageHeight - Image does not meet height requirement.
+    * (>= 8.1.0) maxHeight - Image is too tall.
+    * (>= 8.1.0) maxWidth - Image is too wide.
+    * (>= 8.1.0) minHeight - Image is not tall enough.
+    * (>= 8.1.0) minWidth - Image is not wide enough
 
 ## Accessor Inputs
 
@@ -212,6 +217,8 @@ All inputs are optional.
 * `[withMeta]` - If `true`, each file will receive additional properties adhering to the ICustomFile interface. If you plan to validate maxHeight and maxWidth, `true` **is required**.
 * `[maxHeight]` - The largest acceptable height, in pixels, for image files.
 * `[maxWidth]` - The largest acceptable width, in pixels, for image files.
+* `[minHeight]` - The smallest acceptable height, in pixels, for image files.
+* `[minWidth]` - The smallest acceptable width, in pixels, for image files.
 
 ## ICustomFile
 
@@ -231,7 +238,11 @@ failed that validation check.
     - fileSize - File size is too large.
     - fileType - File **type** failed to match.
     - fileExt - File **extension** failed to match.
-    - imageWidth - Image is too wide.
-    - imageHeight - Image is too tall.
+    - imageWidth - Image does not meet width requirement.
+    - imageHeight - Image does not meet height requirement.
+    - (>= 8.1.0) maxHeight - Image is too tall.
+    - (>= 8.1.0) maxWidth - Image is too wide.
+    - (>= 8.1.0) minHeight - Image is not tall enough.
+    - (>= 8.1.0) minWidth - Image is not wide enough
 
 

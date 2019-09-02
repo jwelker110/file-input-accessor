@@ -1,7 +1,17 @@
 import {ReplaySubject} from 'rxjs';
 
 export interface ICustomFile extends File {
-    errors?: {[key: string]: any};
+    errors?: {
+        imageWidth?: boolean,
+        imageHeight?: boolean,
+        maxWidth?: boolean,
+        maxHeight?: boolean,
+        minWidth?: boolean,
+        minHeight?: boolean,
+        fileSize?: boolean,
+        fileType?: boolean,
+        fileExt?: boolean
+    };
     imgSrc?: string;
     imgHeight?: number;
     imgWidth?: number;

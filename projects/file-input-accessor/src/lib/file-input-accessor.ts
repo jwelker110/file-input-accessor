@@ -41,6 +41,10 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
 
     @Input() maxWidth: number;
 
+    @Input() minHeight: number;
+
+    @Input() minWidth: number;
+
     @Input()
     set allowedExt(value: RegExp | string | string[]) {
         if (typeof value === 'string') {
@@ -98,8 +102,8 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
 
             for (const f of c.value) {
                 if (this.size && this.size < f.size) {
-                    f.errors['fileSize'] = true;
-                    errors['fileSize'] = true;
+                    f.errors.fileSize = true;
+                    errors.fileSize = true;
                 }
 
                 if (f.isImg && (this.maxWidth || this.maxHeight)) {
@@ -108,14 +112,43 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
                             .pipe(
                                 take(1),
                                 map((e: ProgressEvent) => {
-                                    if (this.maxWidth && f.imgWidth > this.maxWidth) {
-                                        f.errors['imageWidth'] = true;
-                                        errors['imageWidth'] = true;
+                                    const minWidthError = this.minWidth && f.imgWidth < this.minWidth;
+                                    const minHeightError = this.minHeight && f.imgHeight < this.minHeight;
+                                    const maxWidthError = this.maxWidth && f.imgWidth > this.maxWidth;
+                                    const maxHeightError = this.maxHeight && f.imgHeight > this.maxHeight;
+
+                                    if (minWidthError) {
+                                        f.errors.minWidth = true;
+                                        errors.minWidth = true;
                                     }
-                                    if (this.maxHeight && f.imgHeight > this.maxHeight) {
-                                        f.errors['imageHeight'] = true;
-                                        errors['imageHeight'] = true;
+
+                                    if (minHeightError) {
+                                        f.errors.minHeight = true;
+                                        errors.minHeight = true;
                                     }
+
+                                    if (maxWidthError) {
+                                        f.errors.maxWidth = true;
+                                        errors.maxWidth = true;
+                                    }
+
+                                    if (maxHeightError) {
+                                        f.errors.maxHeight = true;
+                                        errors.maxHeight = true;
+                                    }
+
+                                    /** will be @deprecated **/
+                                    if (minWidthError || maxWidthError) {
+                                        f.errors.imageWidth = true;
+                                        errors.imageWidth = true;
+                                    }
+
+                                    /** will be @deprecated **/
+                                    if (minHeightError || maxHeightError) {
+                                        f.errors.imageHeight = true;
+                                        errors.imageHeight = true;
+                                    }
+
                                     return e;
                                 }))
                     );
@@ -127,13 +160,13 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
                 const typeP = this.generateRegExp(this.allowedTypes);
 
                 if (extP && !extP.test(f.name)) {
-                    f.errors['fileExt'] = true;
-                    errors['fileExt'] = true;
+                    f.errors.fileExt = true;
+                    errors.fileExt = true;
                 }
 
                 if (typeP && !typeP.test(f.type)) {
-                    f.errors['fileType'] = true;
-                    errors['fileType'] = true;
+                    f.errors.fileType = true;
+                    errors.fileType = true;
                 }
             }
             if (loaders.length) {
