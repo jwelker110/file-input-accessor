@@ -1,3 +1,6 @@
+# 9.0.0 (2020-02-22)
+* Updated to Angular 9.
+
 # 8.1.1 (2019-09-02)
 * Fix a bug where min validation was not performed if max constraints were not set.
 

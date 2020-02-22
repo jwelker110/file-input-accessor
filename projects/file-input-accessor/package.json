@@ -1,6 +1,6 @@
 {
   "name": "file-input-accessor",
-  "version": "8.1.1",
+  "version": "9.0.0",
   "description": "Angular directive that provides file input functionality in reactive & template driven Angular forms.",
   "keywords": [
     "angular",
@@ -16,6 +16,8 @@
     "angular7",
     "angular8",
     "angular 8",
+    "angular9",
+    "angular 9",
     "file",
     "input",
     "reactive",
