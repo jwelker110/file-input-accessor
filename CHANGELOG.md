@@ -1,3 +1,6 @@
+# 9.0.1 (2020-03-19)
+* Update the Angular dependencies to latest version.
+
 # 9.0.0 (2020-02-22)
 * Updated to Angular 9.
 

@@ -240,9 +240,10 @@ failed that validation check.
     - fileExt - File **extension** failed to match.
     - imageWidth - Image does not meet width requirement.
     - imageHeight - Image does not meet height requirement.
-    - (>= 8.1.0) maxHeight - Image is too tall.
-    - (>= 8.1.0) maxWidth - Image is too wide.
-    - (>= 8.1.0) minHeight - Image is not tall enough.
-    - (>= 8.1.0) minWidth - Image is not wide enough.
+        #### version >= 8.1.0
+        - maxHeight - Image is too tall.
+        - maxWidth - Image is too wide.
+        - minHeight - Image is not tall enough.
+        - minWidth - Image is not wide enough.
 
 
