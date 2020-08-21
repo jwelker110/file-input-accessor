@@ -242,7 +242,7 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
         );
 
         const onloadReplay = new ReplaySubject<[Event, ProgressEvent]>(1);
-        forkJoin(imgLoadObs, frLoadObs).pipe(first()).subscribe(onloadReplay);
+        forkJoin([imgLoadObs, frLoadObs]).pipe(first()).subscribe(onloadReplay);
 
         imgLoadObs.pipe(first()).subscribe(() => {
             f.imgHeight = img.height;
