@@ -12,7 +12,6 @@ import {FileFormComponent} from './components/file-form/file-form.component';
     ],
     imports: [
         BrowserModule,
-        FileInputAccessorModule,
         FileInputAccessorModule
     ],
     providers: [],

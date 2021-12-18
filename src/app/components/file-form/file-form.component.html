@@ -11,14 +11,17 @@
         to the console
         if you want to see what gets emitted on change.
       </p>
-      <p><strong>For Angular 4 and 5, use version 1.x.x. For Angular 6 use version 2.x.x. Angular 7 and above aligns
-                 with the Angular version, so for Angular 7, use 7.x.x, Angular 8, use 8.x.x, etc..</strong></p>
+      <h5>Versions</h5>
+      <ul class="">
+        <li>For Angular 4 and 5, use version 1.x.x.</li>
+        <li>For Angular 6 use version 2.x.x.</li>
+        <li>Angular 7 and above aligns with the major Angular version.</li>
+      </ul>
     </div>
   </div>
 
   <div class="row">
     <div class="col-12">
-      <!--<h3>Add files</h3>-->
       <p>Choose one or more files (they don't get uploaded anywhere). Validation errors are red.</p>
     </div>
     <div class="form-group col-sm-6" [formGroup]="form">
@@ -41,9 +44,9 @@
     </div>
 
     <div class="col-sm-6" [ngSwitch]="form.get('file').disabled">
-      <button class="btn btn-primary" (click)="removeFiles()">Clear files</button>
-      <button *ngSwitchCase="false" class="btn btn-warning" (click)="disableFileControl()">Disable</button>
-      <button *ngSwitchCase="true" class="btn btn-success" (click)="enableFileControl()">Enable</button>
+      <button class="btn btn-primary mr-1" (click)="removeFiles()">Clear files</button>
+      <button *ngSwitchCase="false" class="btn btn-warning mr-1" (click)="disableFileControl()">Disable</button>
+      <button *ngSwitchCase="true" class="btn btn-success mr-1" (click)="enableFileControl()">Enable</button>
     </div>
 
     <div class="col-12 info-container">
@@ -94,7 +97,7 @@
       <div class="form-group">
         <label class="col-form-label" for="width">Min image width <a
             href="https://github.com/jwelker110/file-input-accessor/blob/master/CHANGELOG.md" target="_blank"><strong>(>=
-                                                                                                                      8.1.0)</strong></a>&nbsp;<span
+                                                                                                                      v8.1.0)</strong></a>&nbsp;<span
             class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
         <div class="input-group">
           <div class="input-group-prepend">
@@ -110,7 +113,7 @@
       <div class="form-group">
         <label class="col-form-label" for="height">Min image height <a
             href="https://github.com/jwelker110/file-input-accessor/blob/master/CHANGELOG.md" target="_blank"><strong>(>=
-                                                                                                                      8.1.0)</strong></a>&nbsp;<span
+                                                                                                                      v8.1.0)</strong></a>&nbsp;<span
             class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
         <div class="input-group">
           <div class="input-group-prepend">
@@ -207,15 +210,15 @@
           <div>{{file.size}} bytes</div>
           <div *ngIf="file.isImg">{{file.imgWidth}} x {{file.imgHeight}}px</div>
           <div class="error-container">
-            <div [ngClass]="{'text-danger': file.errors.fileType}">File type not allowed.</div>
-            <div [ngClass]="{'text-danger': file.errors.fileExt}">File extension not allowed.</div>
-            <div [ngClass]="{'text-danger': file.errors.fileSize}">File is too large.</div>
-            <div [ngClass]="{'text-danger': file.errors.imageWidth}">Image does not meet width requirements.</div>
-            <div [ngClass]="{'text-danger': file.errors.imageHeight}">Image does not meet height requirements.</div>
-            <div [ngClass]="{'text-danger': file.errors.maxWidth}">Image too wide.</div>
-            <div [ngClass]="{'text-danger': file.errors.maxHeight}">Image too tall.</div>
-            <div [ngClass]="{'text-danger': file.errors.minWidth}">Image not wide enough.</div>
-            <div [ngClass]="{'text-danger': file.errors.minHeight}">Image not tall enough.</div>
+            <div [ngClass]="{'text-danger': file.errors?.fileType}">File type not allowed.</div>
+            <div [ngClass]="{'text-danger': file.errors?.fileExt}">File extension not allowed.</div>
+            <div [ngClass]="{'text-danger': file.errors?.fileSize}">File is too large.</div>
+            <div [ngClass]="{'text-danger': file.errors?.imageWidth}">Image does not meet width requirements.</div>
+            <div [ngClass]="{'text-danger': file.errors?.imageHeight}">Image does not meet height requirements.</div>
+            <div [ngClass]="{'text-danger': file.errors?.maxWidth}">Image too wide.</div>
+            <div [ngClass]="{'text-danger': file.errors?.maxHeight}">Image too tall.</div>
+            <div [ngClass]="{'text-danger': file.errors?.minWidth}">Image not wide enough.</div>
+            <div [ngClass]="{'text-danger': file.errors?.minHeight}">Image not tall enough.</div>
           </div>
           <div class="file-contents">
             <img *ngIf="file.imgSrc" [src]="file.imgSrc" />
