@@ -2,8 +2,8 @@
   "name": "file-input",
   "version": "0.0.0",
   "scripts": {
-    "build:docs": "ng build file-input --prod --base-href /file-input-accessor/",
-    "build:lib": "ng build file-input-accessor --prod",
+    "build:docs": "ng build file-input --configuration production --base-href /file-input-accessor/",
+    "build:lib": "ng build file-input-accessor --configuration production",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",

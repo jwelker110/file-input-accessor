@@ -1,6 +1,7 @@
 {
   "name": "file-input-accessor",
   "version": "13.0.0",
+  "type": "module",
   "description": "Angular directive that provides file input functionality in reactive & template driven Angular forms.",
   "keywords": [
     "angular",
