@@ -51,7 +51,7 @@ As a general rule:
 
 #### RxJS
 
-RxJS [docs](https://beta-rxjsdocs.firebaseapp.com/) (beta as of 2018/05/05). [Another](https://www.learnrxjs.io/operators/) very helpful resource to familiarize yourself with Rxjs by providing a list of commonly used operators with examples.
+RxJS [docs](https://beta-rxjsdocs.firebaseapp.com/) (beta as of 2018/05/05). [Another](https://www.learnrxjs.io/learn-rxjs/operators) very helpful resource to familiarize yourself with Rxjs by providing a list of commonly used operators with examples.
 
 ## Using with your forms
 

@@ -4,7 +4,7 @@ import {
     AsyncValidator,
     AsyncValidatorFn,
     ControlValueAccessor,
-    FormControl,
+    UntypedFormControl,
     NG_ASYNC_VALIDATORS,
     NG_VALUE_ACCESSOR,
     ValidationErrors
@@ -94,7 +94,7 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
      * get in my way, way up there ^.
      */
     private generateAsyncValidator(): AsyncValidatorFn {
-        return (c: FormControl): Observable<ValidationErrors> => {
+        return (c: UntypedFormControl): Observable<ValidationErrors> => {
             if (!c.value || !c.value.length || c.disabled) return of({});
 
             const errors: ValidationErrors = {};
