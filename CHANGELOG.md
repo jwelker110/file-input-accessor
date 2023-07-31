@@ -1,3 +1,9 @@
+# 16.0.0 (2023-07-26)
+* Update the Angular dependencies to latest version
+
+# 15.0.0 (2022-12-29)
+* Update the Angular dependencies to latest version.
+
 # 14.0.0 (2022-08-01)
 * Update the Angular dependencies to latest version.
 * Use UntypedFormControl.
