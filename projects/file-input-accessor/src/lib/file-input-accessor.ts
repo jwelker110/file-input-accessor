@@ -28,7 +28,8 @@ import {ICustomFile} from './interfaces';
             useExisting: forwardRef(() => FileInputAccessor),
             multi: true
         }
-    ]
+    ],
+    standalone: false
 })
 export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
     @Input() allowedTypes: RegExp | string | string[];
