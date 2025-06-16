@@ -1,3 +1,7 @@
+# 20.0.0 (2025-06-16)
+* Update the Angular dependencies to latest version.
+* Minor README cleanup.
+
 # 19.0.0 (2025-01-24)
 * Update the Angular dependencies to latest version.
 
