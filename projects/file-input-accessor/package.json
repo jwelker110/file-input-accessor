@@ -1,6 +1,6 @@
 {
   "name": "file-input-accessor",
-  "version": "19.0.0",
+  "version": "20.0.0",
   "type": "module",
   "description": "Angular directive that provides file input functionality in reactive & template driven Angular forms.",
   "keywords": [
@@ -39,6 +39,8 @@
     "angular18",
     "angular 19",
     "angular19",
+    "angular 20",
+    "angular20",
     "file",
     "input",
     "reactive",
@@ -60,8 +62,8 @@
     "url": "https://github.com/jwelker110/file-input-accessor/issues"
   },
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0",
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
     "rxjs": "^7.4.0"
   },
   "dependencies": {

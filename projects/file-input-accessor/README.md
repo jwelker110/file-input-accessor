@@ -1,25 +1,5 @@
 Looking for the [changelog](https://github.com/jwelker110/file-input-accessor/blob/master/CHANGELOG.md)?
 
-#### (Versions of this package < 2.0.1) If you see an error about an unknown token `{` with some imports.
-
-This isn't compatible with Angular Universal (Server side rendering) yet. I'll fix this in a future release. Until then, if you need to server-side render this package, please refer to the instructions [here](https://github.com/SebastianM/angular-google-maps/issues/1052#issuecomment-331150772). Summarized below:
-
-- npm i --save-dev babel-cli babel-preset-es2015
-- create a .babelrc file in the project's root directory with the following contents:
-    ```json 
-    {
-        "presets": ["es2015"]
-    }
-    ```
-- Add a script to your package.json:
-    ```json
-    "compile:file-input-accessor": "babel node_modules/file-input-accessor -d node_modules/file-input-accessor --presets es2015"
-    ```
-- Add a postinstall script to your package.json scripts section:
-    ```json
-    "postinstall": "compile:file-input-accessor"
-    ```
-
 # FileInputAccessor
 
 Adds Reactive and Template behavior you're used to using with Angular Forms, but for `<input type="file">`. Check out the [demo](https://jwelker110.github.io/file-input-accessor/) to see it in action. 
