@@ -6,20 +6,19 @@ Adds Reactive and Template behavior you're used to using with Angular Forms, but
 
 Sample code for sending the files from Angular to your backend is [further down](#uploading-the-files) this page. 
 
-Provides [NG_VALUE_ACCESSOR](https://angular.io/api/forms/NG_VALUE_ACCESSOR) implementing the [ControlValueAccessor](https://angular.io/api/forms/ControlValueAccessor)
+Provides [NG_VALUE_ACCESSOR](https://angular.dev/api/forms/NG_VALUE_ACCESSOR#) implementing the [ControlValueAccessor](https://angular.dev/api/forms/ControlValueAccessor)
 interface. For more info, refer to [this stack overflow answer](https://stackoverflow.com/questions/41889384/angular2-validation-for-input-type-file-wont-trigger-when-changing-the-fi/41938495#41938495)
 linked on [this issue](https://github.com/angular/angular/issues/7341).
 
 - [Which version should I use?](#which-version-should-i-use)
-- [Installation](#installation)
-- [Using in your form](#using-in-your-form)
+- [Using with your forms](#using-with-your-forms)
 - [Validation](#validation)
 - [Accessor Inputs](#accessor-inputs)
 - [ICustomFile](#icustomfile)
 
 ## Which version should I use?
 
-**Version 1.x.x uses [Rxjs](https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md) v5.5.x.** Rxjs v6 underwent some changes that include adjustments to the way operators are imported along with other [breaking changes](https://github.com/ReactiveX/rxjs/blob/master/CHANGELOG.md#600-alpha1-2018-01-12). 
+**Version 1.x.x uses [Rxjs](https://github.com/ReactiveX/rxjs/releases) v5.5.x.** Rxjs v6 underwent some changes that include adjustments to the way operators are imported along with other breaking changes. 
 
 **Version 2.x.x uses Rxjs v6.** If you're interested in updating your projects, [a package](https://www.npmjs.com/package/rxjs-compat) has been created for that very purpose by the Rxjs team.
 
@@ -31,7 +30,8 @@ As a general rule:
 
 #### RxJS
 
-RxJS [docs](https://beta-rxjsdocs.firebaseapp.com/) (beta as of 2018/05/05). [Another](https://www.learnrxjs.io/operators/) very helpful resource to familiarize yourself with Rxjs by providing a list of commonly used operators with examples.
+- RxJS [docs](https://rxjs.dev/). 
+- [Learn RxJS](https://www.learnrxjs.io/learn-rxjs/operators) - very helpful resource to familiarize yourself with Rxjs by providing a list of commonly used operators with examples.
 
 ## Using with your forms
 
@@ -79,95 +79,6 @@ RxJS [docs](https://beta-rxjsdocs.firebaseapp.com/) (beta as of 2018/05/05). [An
       <input type="file" multiple [(ngModel)]="manualChangesFiles" name="templateFileUploadControl2">
       <button type="button" (click)="submitFiles()">Click to upload</button>
     </form>
-   ```
-
-## Uploading the files
-1. Import the [HttpClientModule](https://angular.io/api/common/http/HttpClientModule) if it isn't already.
-
-   ```typescript
-    @NgModule({
-        declarations: [
-            AppComponent,
-            FileUploadComponent
-        ],
-        imports: [
-            BrowserModule,
-            RouterModule.forRoot(ROUTES),
-            HttpClientModule,
-            FileInputAccessorModule
-        ],
-        providers: [],
-        bootstrap: [AppComponent]
-    })
-    export class AppModule {
-    }
-   ```
-
-2. When you're ready to upload your files, append them to your [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) and use [HttpClient](https://angular.io/api/common/http/HttpClient) to call your file upload endpoint.
-
-   ```typescript
-    @Component({
-        selector: 'app-file-upload',
-        templateUrl: './file-upload.component.html',
-        styleUrls: ['./file-upload.component.css']
-    })
-    export class FileUploadComponent implements OnInit {
-
-        fileControl = new FormControl();
-
-        modelChangesFiles: ICustomFile[] = [];
-        manualChangesFiles: ICustomFile[] = [];
-
-        constructor(private _http: HttpClient) {
-        }
-
-        /**
-         * Subscribe to the valueChanges Observable on the reactive FormControl.
-         */
-        ngOnInit() {
-            this.fileControl.valueChanges
-                .pipe(mergeMap(files => this.uploadFiles(files)))
-                .subscribe(() => this.fileControl.setValue([]));
-        }
-
-        /**
-         * (ngModelChange) event handler
-         *
-         * @param {ICustomFile[]} event
-         */
-        onFileInputChange(event: ICustomFile[]) {
-            this.uploadFiles(event)
-                .subscribe(() => (this.modelChangesFiles = []));
-        }
-
-        /**
-         * Upload button's (click) event handler
-         */
-        submitFiles() {
-            this.uploadFiles(this.manualChangesFiles)
-                .subscribe(() => (this.manualChangesFiles = []));
-        }
-
-        /**
-         * Appends the provided files to FormData and returns an Observable that will pass the FormData
-         * to the api when subscribed.
-         *
-         * @param {ICustomFile[]} files
-         * @returns {Observable<Object>}
-         */
-        private uploadFiles(files: ICustomFile[]): Observable<Object> {
-            if (!files || files.length === 0) {
-                return EMPTY;
-            }
-
-            const data = new FormData();
-
-            for (const file of files) {
-                data.append('file', file.slice(), file.name);
-            }
-            return this._http.post('/api/files', data);
-        }
-    }
    ```
 
 ## Validation
@@ -225,5 +136,3 @@ failed that validation check.
         - maxWidth - Image is too wide.
         - minHeight - Image is not tall enough.
         - minWidth - Image is not wide enough.
-
-
