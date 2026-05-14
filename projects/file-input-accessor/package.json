@@ -70,5 +70,8 @@
   },
   "dependencies": {
     "tslib": "^2.2.0"
+  },
+  "devDependencies": {
+    "vite": "^8.0.12"
   }
 }

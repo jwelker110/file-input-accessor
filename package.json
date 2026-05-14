@@ -12,6 +12,9 @@
     "e2e": "ng e2e"
   },
   "private": true,
+  "workspaces": [
+    "projects/file-input-accessor"
+  ],
   "dependencies": {
     "@angular/animations": "^21.0.6",
     "@angular/common": "^21.0.6",
@@ -32,12 +35,15 @@
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.0.6",
     "@angular/language-service": "^21.0.6",
-    "@types/node": "20.10.0",
+    "@types/node": "^20.19.41",
+    "@vitest/browser-playwright": "^4.1.6",
     "codelyzer": "^6.0.0",
     "ng-packagr": "^21.0.1",
+    "playwright": "^1.60.0",
     "protractor": "~7.0.0",
     "ts-node": "~5.0.1",
     "tslint": "~6.1.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.1.6"
   }
 }

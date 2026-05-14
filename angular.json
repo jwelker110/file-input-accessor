@@ -153,11 +153,21 @@
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "main": "projects/file-input-accessor/src/test.ts",
+            "buildTarget": "file-input-accessor:test-build",
             "tsConfig": "projects/file-input-accessor/tsconfig.spec.json",
-            "karmaConfig": "projects/file-input-accessor/karma.conf.js"
+            "runner": "vitest",
+            "runnerConfig": "projects/file-input-accessor/vitest.config.ts",
+            "include": ["projects/file-input-accessor/src/**/*.spec.ts"]
+          }
+        },
+        "test-build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/file-input-accessor/src/test.ts",
+            "tsConfig": "projects/file-input-accessor/tsconfig.spec.json",
+            "polyfills": ["zone.js", "zone.js/testing"]
           }
         },
         "lint": {
