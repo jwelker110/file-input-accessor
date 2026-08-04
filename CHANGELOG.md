@@ -1,3 +1,10 @@
+# Unreleased
+* Modernized `FileInputAccessor` internals to current Angular idioms: signal `input()`s, `inject()`, and `host` metadata instead of decorators.
+* Template bindings, validation behavior, and error keys are unchanged.
+* **Breaking (narrow case)**: reading the directive's inputs programmatically (e.g. `accessor.allowedExt`) now returns a signal function instead of a plain value. Call it (`accessor.allowedExt()`) to get the value. The `allowedExt` value is also no longer mutated on assignment - end-of-name anchoring (`$`) is applied when the pattern is evaluated, so reading the input back returns exactly what was set.
+* `registerOnTouched` now stores its callback, so the control is properly marked touched on blur.
+* Library unit tests run on vitest (browser mode via Playwright) instead of Karma.
+
 # 21.0.0 (2025-12-25)
 * Update the Angular dependencies to latest version.
 * Updated README - updated links and removed file upload example.
