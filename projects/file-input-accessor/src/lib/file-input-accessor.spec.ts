@@ -76,6 +76,18 @@ describe('FileInputAccessor', () => {
     });
 
 
+    describe('registerOnTouched', () => {
+        it('invokes the registered callback on blur', () => {
+            let touched = false;
+            accessor.registerOnTouched(() => { touched = true; });
+
+            inputEl.dispatchEvent(new Event('blur'));
+
+            expect(touched).toBe(true);
+        });
+    });
+
+
     describe('setDisabledState', () => {
         it('disables the native input when called with true', () => {
             accessor.setDisabledState(true);
@@ -92,27 +104,35 @@ describe('FileInputAccessor', () => {
     });
 
 
-    describe('allowedExt setter', () => {
-        it('appends $ to a string pattern', () => {
+    describe('allowedExt anchoring', () => {
+        it('anchors a string pattern at the end of the file name', async () => {
             host.allowedExt = '\\.txt';
             fixture.detectChanges();
+            const matching = prepared(makeTextFile('note.txt'));
+            const middle = prepared(makeTextFile('note.txt.bak'));
+            host.control.setValue([matching, middle]);
 
-            expect(accessor.allowedExt).toBe('\\.txt$');
+            const result = await runValidate(accessor, host.control);
+
+            expect(matching.errors!.fileExt).toBeUndefined();
+            expect(middle.errors!.fileExt).toBe(true);
+            expect(result.fileExt).toBe(true);
         });
 
-        it('joins an array with | and appends $', () => {
+        it('anchors every entry of an array pattern at the end of the file name', async () => {
             host.allowedExt = ['\\.txt', '\\.md'];
             fixture.detectChanges();
+            const endsTxt = prepared(makeTextFile('note.txt'));
+            const endsMd = prepared(makeTextFile('note.md', '', 'text/markdown'));
+            const middle = prepared(makeTextFile('note.txt.bak'));
+            host.control.setValue([endsTxt, endsMd, middle]);
 
-            expect(accessor.allowedExt).toBe('\\.txt|\\.md$');
-        });
+            const result = await runValidate(accessor, host.control);
 
-        it('keeps a RegExp pattern unchanged', () => {
-            const pattern = /\.txt$/;
-            host.allowedExt = pattern;
-            fixture.detectChanges();
-
-            expect(accessor.allowedExt).toBe(pattern);
+            expect(endsTxt.errors!.fileExt).toBeUndefined();
+            expect(endsMd.errors!.fileExt).toBeUndefined();
+            expect(middle.errors!.fileExt).toBe(true);
+            expect(result.fileExt).toBe(true);
         });
     });
 

@@ -8,6 +8,10 @@
 # cache
 .angular
 
+# vitest browser-mode artifacts
+.vitest-attachments/
+**/__screenshots__/
+
 # dependencies
 /node_modules
 
