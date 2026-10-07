@@ -3,7 +3,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {Component} from '@angular/core';
 import {FormControl, ReactiveFormsModule, ValidationErrors} from '@angular/forms';
 import {By} from '@angular/platform-browser';
-import {firstValueFrom, Observable} from 'rxjs';
+import {filter, firstValueFrom, Observable} from 'rxjs';
 import {FileInputAccessor} from './file-input-accessor';
 import {FileInputAccessorModule} from './file-input-accessor.module';
 import {ICustomFile} from './interfaces';
@@ -143,9 +143,10 @@ describe('FileInputAccessor', () => {
             const file = makeTextFile('hello.txt');
 
             accessor.onChange([file]);
-            const emitted = host.control.value as ICustomFile[];
+            const emitted: ICustomFile[] = host.control.value;
 
-            expect(emitted).toEqual([file]);
+            expect(emitted.length).toBe(1);
+            expect(emitted[0]).toBe(file);
             expect(emitted[0].errors).toEqual({});
         });
 
@@ -477,6 +478,54 @@ describe('FileInputAccessor', () => {
             expect(smallTxt.errors.fileExt).toBeUndefined();
         });
     });
+
+
+    describe('form integration', () => {
+        it('emits the selected files to the control when the input fires change', () => {
+            selectFiles(inputEl, [makeTextFile('hello.txt', 'hi')]);
+
+            const emitted: ICustomFile[] = host.control.value;
+            expect(emitted.length).toBe(1);
+            expect(emitted[0].name).toBe('hello.txt');
+            expect(emitted[0].errors).toEqual({});
+        });
+
+        it('leaves the control valid when the selected files pass every check', () => {
+            host.size = 100;
+            host.allowedExt = '\\.txt';
+            fixture.detectChanges();
+
+            selectFiles(inputEl, [makeTextFile('ok.txt', 'ok')]);
+
+            expect(host.control.valid).toBe(true);
+            expect(host.control.errors).toBeNull();
+        });
+
+        it('marks the control invalid through the form when a file exceeds the size limit', () => {
+            host.size = 5;
+            fixture.detectChanges();
+
+            selectFiles(inputEl, [makeTextFile('big.txt', 'too long')]);
+
+            expect(host.control.invalid).toBe(true);
+            expect(host.control.errors?.fileSize).toBe(true);
+        });
+
+        it('keeps the control pending until image bounds are checked, then reports the error', async () => {
+            host.withMeta = true;
+            host.maxWidth = 5;
+            fixture.detectChanges();
+            const file = await makePngFile(10, 10);
+
+            selectFiles(inputEl, [file]);
+
+            expect(host.control.pending).toBe(true);
+            await settled(host.control);
+            expect(host.control.invalid).toBe(true);
+            expect(host.control.errors?.maxWidth).toBe(true);
+            expect(host.control.errors?.imageWidth).toBe(true);
+        });
+    });
 });
 
 
@@ -508,6 +557,19 @@ function makePngFile(width: number, height: number): Promise<ICustomFile> {
 
 function prepared(file: ICustomFile): PreparedFile {
     return Object.assign(file, {errors: {}});
+}
+
+function selectFiles(input: HTMLInputElement, files: File[]): void {
+    const transfer = new DataTransfer();
+    for (const file of files) {
+        transfer.items.add(file);
+    }
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change'));
+}
+
+function settled(control: FormControl): Promise<string> {
+    return firstValueFrom(control.statusChanges.pipe(filter((status) => status !== 'PENDING')));
 }
 
 function awaitLoad(replay: Observable<unknown> | undefined): Promise<unknown> {
