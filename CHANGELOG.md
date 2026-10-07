@@ -6,6 +6,8 @@
 * `validate` initializes a missing `errors` object on each file instead of throwing when a file set programmatically fails a check.
 * Library unit tests run on vitest (browser mode via Playwright) instead of Karma.
 * Linting migrated from tslint/codelyzer to ESLint with `angular-eslint`.
+* Removed the Protractor e2e project and its dependencies.
+* Removed the demo app's unused Karma test setup; `npm test` now runs the library's vitest suite.
 
 # 21.0.0 (2025-12-25)
 * Update the Angular dependencies to latest version.

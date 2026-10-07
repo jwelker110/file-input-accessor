@@ -7,10 +7,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test",
+    "test": "npm run test:lib",
     "test:lib": "ng test file-input-accessor --watch false",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "lint": "ng lint"
   },
   "private": true,
   "workspaces": [
@@ -44,8 +43,6 @@
     "eslint": "^10.3.0",
     "ng-packagr": "^21.0.1",
     "playwright": "^1.60.0",
-    "protractor": "~7.0.0",
-    "ts-node": "~5.0.1",
     "typescript": "5.9.3",
     "typescript-eslint": "8.59.2",
     "vitest": "^4.1.6"
