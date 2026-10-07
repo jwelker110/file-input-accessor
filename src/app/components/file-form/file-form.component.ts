@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {ICustomFile} from 'file-input-accessor';
 
 @Component({
@@ -21,20 +21,14 @@ export class FileFormComponent implements OnInit {
     minWidth = 400;
     minHeight = 300;
 
-    form: UntypedFormGroup;
-    fileControl: UntypedFormControl;
+    readonly fileControl = new UntypedFormControl('');
+    readonly form = new UntypedFormGroup({
+        file: this.fileControl
+    });
 
-    checkbox: UntypedFormControl;
-
-    constructor(private _fb: UntypedFormBuilder) {
-        this.form = _fb.group({
-            file: ['']
-        });
-        this.fileControl = <UntypedFormControl> this.form.get('file');
-    }
+    readonly checkbox = new UntypedFormControl(this.withMeta);
 
     ngOnInit() {
-        this.checkbox = new UntypedFormControl(this.withMeta);
         this.fileControl.valueChanges
             .subscribe((val) => {
                 console.log('%c-----FILE LIST CHANGED-----', 'background-color: #008351; color: #fff');
@@ -89,5 +83,3 @@ export class FileFormComponent implements OnInit {
         this.removeFiles();
     }
 }
-
-

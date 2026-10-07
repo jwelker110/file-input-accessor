@@ -3,7 +3,9 @@
 * Template bindings, validation behavior, and error keys are unchanged.
 * **Breaking (narrow case)**: reading the directive's inputs programmatically (e.g. `accessor.allowedExt`) now returns a signal function instead of a plain value. Call it (`accessor.allowedExt()`) to get the value. The `allowedExt` value is also no longer mutated on assignment - end-of-name anchoring (`$`) is applied when the pattern is evaluated, so reading the input back returns exactly what was set.
 * `registerOnTouched` now stores its callback, so the control is properly marked touched on blur.
+* `validate` initializes a missing `errors` object on each file instead of throwing when a file set programmatically fails a check.
 * Library unit tests run on vitest (browser mode via Playwright) instead of Karma.
+* Linting migrated from tslint/codelyzer to ESLint with `angular-eslint`.
 
 # 21.0.0 (2025-12-25)
 * Update the Angular dependencies to latest version.

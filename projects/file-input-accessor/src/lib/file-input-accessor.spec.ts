@@ -8,6 +8,7 @@ import {FileInputAccessor} from './file-input-accessor';
 import {FileInputAccessorModule} from './file-input-accessor.module';
 import {ICustomFile} from './interfaces';
 
+type PreparedFile = ICustomFile & Required<Pick<ICustomFile, 'errors'>>;
 
 @Component({
     template: `
@@ -114,8 +115,8 @@ describe('FileInputAccessor', () => {
 
             const result = await runValidate(accessor, host.control);
 
-            expect(matching.errors!.fileExt).toBeUndefined();
-            expect(middle.errors!.fileExt).toBe(true);
+            expect(matching.errors.fileExt).toBeUndefined();
+            expect(middle.errors.fileExt).toBe(true);
             expect(result.fileExt).toBe(true);
         });
 
@@ -129,9 +130,9 @@ describe('FileInputAccessor', () => {
 
             const result = await runValidate(accessor, host.control);
 
-            expect(endsTxt.errors!.fileExt).toBeUndefined();
-            expect(endsMd.errors!.fileExt).toBeUndefined();
-            expect(middle.errors!.fileExt).toBe(true);
+            expect(endsTxt.errors.fileExt).toBeUndefined();
+            expect(endsMd.errors.fileExt).toBeUndefined();
+            expect(middle.errors.fileExt).toBe(true);
             expect(result.fileExt).toBe(true);
         });
     });
@@ -141,7 +142,7 @@ describe('FileInputAccessor', () => {
         it('emits the file array with errors initialized on each file', () => {
             const file = makeTextFile('hello.txt');
 
-            accessor.onChange([file] as any);
+            accessor.onChange([file]);
             const emitted = host.control.value as ICustomFile[];
 
             expect(emitted).toEqual([file]);
@@ -153,7 +154,7 @@ describe('FileInputAccessor', () => {
             fixture.detectChanges();
             const file = makeTextFile('a.txt', 'hi');
 
-            accessor.onChange([file] as any);
+            accessor.onChange([file]);
 
             expect(file.textLoadReplay).toBeUndefined();
             expect(file.imgLoadReplay).toBeUndefined();
@@ -166,10 +167,10 @@ describe('FileInputAccessor', () => {
             fixture.detectChanges();
             const file = makeTextFile('hello.txt', 'hello world');
 
-            accessor.onChange([file] as any);
+            accessor.onChange([file]);
 
             expect(file.textLoadReplay).toBeTruthy();
-            await firstValueFrom(file.textLoadReplay!);
+            await awaitLoad(file.textLoadReplay);
             expect(file.textContent).toBe('hello world');
         });
 
@@ -178,11 +179,11 @@ describe('FileInputAccessor', () => {
             fixture.detectChanges();
             const file = await makePngFile(10, 20);
 
-            accessor.onChange([file] as any);
+            accessor.onChange([file]);
 
             expect(file.isImg).toBe(true);
             expect(file.imgLoadReplay).toBeTruthy();
-            await firstValueFrom(file.imgLoadReplay!);
+            await awaitLoad(file.imgLoadReplay);
             expect(file.imgWidth).toBe(10);
             expect(file.imgHeight).toBe(20);
             expect(file.imgSrc).toMatch(/^data:image\/png;base64,/);
@@ -193,7 +194,7 @@ describe('FileInputAccessor', () => {
             fixture.detectChanges();
             const file = new File([new Uint8Array([1, 2, 3])], 'data.bin', {type: 'application/octet-stream'}) as ICustomFile;
 
-            accessor.onChange([file] as any);
+            accessor.onChange([file]);
 
             expect(file.textLoadReplay).toBeUndefined();
             expect(file.imgLoadReplay).toBeUndefined();
@@ -232,7 +233,7 @@ describe('FileInputAccessor', () => {
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.fileSize).toBe(true);
-                expect(file.errors!.fileSize).toBe(true);
+                expect(file.errors.fileSize).toBe(true);
             });
 
             it('does not flag files within the size limit', async () => {
@@ -244,7 +245,7 @@ describe('FileInputAccessor', () => {
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.fileSize).toBeUndefined();
-                expect(file.errors!.fileSize).toBeUndefined();
+                expect(file.errors.fileSize).toBeUndefined();
             });
         });
 
@@ -259,7 +260,7 @@ describe('FileInputAccessor', () => {
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.fileExt).toBe(true);
-                expect(file.errors!.fileExt).toBe(true);
+                expect(file.errors.fileExt).toBe(true);
             });
 
             it('passes files whose name matches a string pattern', async () => {
@@ -271,7 +272,7 @@ describe('FileInputAccessor', () => {
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.fileExt).toBeUndefined();
-                expect(file.errors!.fileExt).toBeUndefined();
+                expect(file.errors.fileExt).toBeUndefined();
             });
 
             it('passes files matching one entry of an array pattern', async () => {
@@ -318,7 +319,7 @@ describe('FileInputAccessor', () => {
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.fileType).toBe(true);
-                expect(file.errors!.fileType).toBe(true);
+                expect(file.errors.fileType).toBe(true);
             });
 
             it('passes files whose MIME type matches', async () => {
@@ -330,7 +331,7 @@ describe('FileInputAccessor', () => {
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.fileType).toBeUndefined();
-                expect(file.errors!.fileType).toBeUndefined();
+                expect(file.errors.fileType).toBeUndefined();
             });
 
             it('passes files matching one entry of an array pattern', async () => {
@@ -364,14 +365,14 @@ describe('FileInputAccessor', () => {
                 fixture.detectChanges();
                 const file = await makePngFile(10, 10);
 
-                accessor.onChange([file] as any);
-                await firstValueFrom(file.imgLoadReplay!);
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.maxWidth).toBe(true);
                 expect(result.imageWidth).toBe(true);
-                expect(file.errors!.maxWidth).toBe(true);
-                expect(file.errors!.imageWidth).toBe(true);
+                expect(file.errors?.maxWidth).toBe(true);
+                expect(file.errors?.imageWidth).toBe(true);
             });
 
             it('flags images taller than maxHeight and sets the imageHeight alias', async () => {
@@ -380,14 +381,14 @@ describe('FileInputAccessor', () => {
                 fixture.detectChanges();
                 const file = await makePngFile(5, 10);
 
-                accessor.onChange([file] as any);
-                await firstValueFrom(file.imgLoadReplay!);
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.maxHeight).toBe(true);
                 expect(result.imageHeight).toBe(true);
-                expect(file.errors!.maxHeight).toBe(true);
-                expect(file.errors!.imageHeight).toBe(true);
+                expect(file.errors?.maxHeight).toBe(true);
+                expect(file.errors?.imageHeight).toBe(true);
             });
 
             it('flags images narrower than minWidth and sets the imageWidth alias', async () => {
@@ -396,14 +397,14 @@ describe('FileInputAccessor', () => {
                 fixture.detectChanges();
                 const file = await makePngFile(10, 10);
 
-                accessor.onChange([file] as any);
-                await firstValueFrom(file.imgLoadReplay!);
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.minWidth).toBe(true);
                 expect(result.imageWidth).toBe(true);
-                expect(file.errors!.minWidth).toBe(true);
-                expect(file.errors!.imageWidth).toBe(true);
+                expect(file.errors?.minWidth).toBe(true);
+                expect(file.errors?.imageWidth).toBe(true);
             });
 
             it('flags images shorter than minHeight and sets the imageHeight alias', async () => {
@@ -412,14 +413,14 @@ describe('FileInputAccessor', () => {
                 fixture.detectChanges();
                 const file = await makePngFile(10, 10);
 
-                accessor.onChange([file] as any);
-                await firstValueFrom(file.imgLoadReplay!);
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.minHeight).toBe(true);
                 expect(result.imageHeight).toBe(true);
-                expect(file.errors!.minHeight).toBe(true);
-                expect(file.errors!.imageHeight).toBe(true);
+                expect(file.errors?.minHeight).toBe(true);
+                expect(file.errors?.imageHeight).toBe(true);
             });
 
             it('passes images that fall within all bounds', async () => {
@@ -431,8 +432,8 @@ describe('FileInputAccessor', () => {
                 fixture.detectChanges();
                 const file = await makePngFile(10, 10);
 
-                accessor.onChange([file] as any);
-                await firstValueFrom(file.imgLoadReplay!);
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.minWidth).toBeUndefined();
@@ -449,7 +450,7 @@ describe('FileInputAccessor', () => {
                 fixture.detectChanges();
                 const file = await makePngFile(10, 10);
 
-                accessor.onChange([file] as any);
+                accessor.onChange([file]);
                 const result = await runValidate(accessor, host.control);
 
                 expect(result.maxWidth).toBeUndefined();
@@ -470,10 +471,10 @@ describe('FileInputAccessor', () => {
 
             expect(result.fileSize).toBe(true);
             expect(result.fileExt).toBe(true);
-            expect(bigJpg.errors!.fileSize).toBe(true);
-            expect(bigJpg.errors!.fileExt).toBe(true);
-            expect(smallTxt.errors!.fileSize).toBeUndefined();
-            expect(smallTxt.errors!.fileExt).toBeUndefined();
+            expect(bigJpg.errors.fileSize).toBe(true);
+            expect(bigJpg.errors.fileExt).toBe(true);
+            expect(smallTxt.errors.fileSize).toBeUndefined();
+            expect(smallTxt.errors.fileExt).toBeUndefined();
         });
     });
 });
@@ -505,9 +506,15 @@ function makePngFile(width: number, height: number): Promise<ICustomFile> {
     });
 }
 
-function prepared(file: ICustomFile): ICustomFile {
-    file.errors = {};
-    return file;
+function prepared(file: ICustomFile): PreparedFile {
+    return Object.assign(file, {errors: {}});
+}
+
+function awaitLoad(replay: Observable<unknown> | undefined): Promise<unknown> {
+    if (replay == null) {
+        throw new Error('expected the file to have a load replay subject');
+    }
+    return firstValueFrom(replay);
 }
 
 async function runValidate(accessor: FileInputAccessor, control: FormControl): Promise<ValidationErrors> {

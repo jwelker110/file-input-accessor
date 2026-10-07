@@ -93,14 +93,11 @@
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "src/tsconfig.app.json",
-              "src/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
             ]
           }
         }
@@ -123,11 +120,10 @@
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": "e2e/tsconfig.e2e.json",
-            "exclude": [
-              "**/node_modules/**"
+            "lintFilePatterns": [
+              "e2e/**/*.ts"
             ]
           }
         }
@@ -149,7 +145,7 @@
             "production": {
               "project": "projects/file-input-accessor/ng-package.prod.json",
               "tsConfig": "projects/file-input-accessor/tsconfig.lib.prod.json"
-}
+            }
           }
         },
         "test": {
@@ -159,7 +155,9 @@
             "tsConfig": "projects/file-input-accessor/tsconfig.spec.json",
             "runner": "vitest",
             "runnerConfig": "projects/file-input-accessor/vitest.config.ts",
-            "include": ["projects/file-input-accessor/src/**/*.spec.ts"]
+            "include": [
+              "projects/file-input-accessor/src/**/*.spec.ts"
+            ]
           }
         },
         "test-build": {
@@ -167,19 +165,20 @@
           "options": {
             "browser": "projects/file-input-accessor/src/test.ts",
             "tsConfig": "projects/file-input-accessor/tsconfig.spec.json",
-            "polyfills": ["zone.js", "zone.js/testing"]
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "projects/file-input-accessor/tsconfig.lib.json",
-              "projects/file-input-accessor/tsconfig.spec.json"
+            "lintFilePatterns": [
+              "projects/file-input-accessor/**/*.ts",
+              "projects/file-input-accessor/**/*.html"
             ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "eslintConfig": "projects/file-input-accessor/eslint.config.cjs"
           }
         }
       }

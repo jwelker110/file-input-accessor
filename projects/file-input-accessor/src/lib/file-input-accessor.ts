@@ -44,11 +44,11 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
     readonly minHeight = input<number>();
     readonly minWidth = input<number>();
 
-    onChange: (files: ICustomFile[] | FileList) => void = () => {};
-    onTouched: () => void = () => {};
-
     private readonly renderer = inject(Renderer2);
     private readonly elementRef = inject(ElementRef);
+
+    onChange: (files: ICustomFile[] | FileList) => void = () => {};
+    onTouched: () => void = () => {};
 
     writeValue(_value: unknown): void {
         this.renderer.setProperty(this.elementRef.nativeElement, 'value', null);
@@ -80,8 +80,9 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
         const hasImageBounds = !!(this.maxWidth() || this.maxHeight() || this.minWidth() || this.minHeight());
 
         for (const file of files) {
+            const fileErrors = file.errors ??= {};
             if (maxSize && file.size > maxSize) {
-                file.errors!.fileSize = true;
+                fileErrors.fileSize = true;
                 errors.fileSize = true;
             }
             // RegExp is recreated per file because patterns produced from `[]` carry the `g`
@@ -89,11 +90,11 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
             const extPattern = this.toRegExp(allowedExt, true);
             const typePattern = this.toRegExp(allowedTypes, false);
             if (extPattern && !extPattern.test(file.name)) {
-                file.errors!.fileExt = true;
+                fileErrors.fileExt = true;
                 errors.fileExt = true;
             }
             if (typePattern && !typePattern.test(file.type)) {
-                file.errors!.fileType = true;
+                fileErrors.fileType = true;
                 errors.fileType = true;
             }
             if (hasImageBounds && file.isImg && file.imgLoadReplay) {
@@ -129,40 +130,44 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
     }
 
     private applyImageBoundErrors(file: ICustomFile, errors: ValidationErrors): void {
+        const {imgWidth, imgHeight} = file;
+        if (imgWidth == null || imgHeight == null) return;
+
+        const fileErrors = file.errors ??= {};
         const minW = this.minWidth();
         const minH = this.minHeight();
         const maxW = this.maxWidth();
         const maxH = this.maxHeight();
 
-        const minWidthError = !!minW && file.imgWidth! < minW;
-        const minHeightError = !!minH && file.imgHeight! < minH;
-        const maxWidthError = !!maxW && file.imgWidth! > maxW;
-        const maxHeightError = !!maxH && file.imgHeight! > maxH;
+        const minWidthError = !!minW && imgWidth < minW;
+        const minHeightError = !!minH && imgHeight < minH;
+        const maxWidthError = !!maxW && imgWidth > maxW;
+        const maxHeightError = !!maxH && imgHeight > maxH;
 
         if (minWidthError) {
-            file.errors!.minWidth = true;
+            fileErrors.minWidth = true;
             errors.minWidth = true;
         }
         if (minHeightError) {
-            file.errors!.minHeight = true;
+            fileErrors.minHeight = true;
             errors.minHeight = true;
         }
         if (maxWidthError) {
-            file.errors!.maxWidth = true;
+            fileErrors.maxWidth = true;
             errors.maxWidth = true;
         }
         if (maxHeightError) {
-            file.errors!.maxHeight = true;
+            fileErrors.maxHeight = true;
             errors.maxHeight = true;
         }
 
         // imageWidth/imageHeight are deprecated aliases kept for backwards compatibility.
         if (minWidthError || maxWidthError) {
-            file.errors!.imageWidth = true;
+            fileErrors.imageWidth = true;
             errors.imageWidth = true;
         }
         if (minHeightError || maxHeightError) {
-            file.errors!.imageHeight = true;
+            fileErrors.imageHeight = true;
             errors.imageHeight = true;
         }
     }

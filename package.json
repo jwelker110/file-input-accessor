@@ -36,15 +36,18 @@
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.0.6",
     "@angular/language-service": "^21.0.6",
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^20.19.41",
     "@vitest/browser-playwright": "^4.1.6",
-    "codelyzer": "^6.0.0",
+    "angular-eslint": "21.4.0",
+    "eslint": "^10.3.0",
     "ng-packagr": "^21.0.1",
     "playwright": "^1.60.0",
     "protractor": "~7.0.0",
     "ts-node": "~5.0.1",
-    "tslint": "~6.1.0",
     "typescript": "5.9.3",
+    "typescript-eslint": "8.59.2",
     "vitest": "^4.1.6"
   }
 }
