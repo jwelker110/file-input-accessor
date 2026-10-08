@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {Component} from '@angular/core';
-import {FormControl, ReactiveFormsModule, ValidationErrors} from '@angular/forms';
+import {FormControl, FormGroup, NgModel, ReactiveFormsModule, ValidationErrors} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {firstValueFrom, Observable} from 'rxjs';
 import {makePngFile, makeTextFile, selectFiles, settled} from '@testing/file-helpers';
@@ -36,6 +36,35 @@ class HostComponent {
     maxWidth: number | undefined;
     minHeight: number | undefined;
     minWidth: number | undefined;
+}
+
+@Component({
+    template: `
+        <input type="file" multiple
+               [(ngModel)]="files"
+               [size]="size"/>
+    `,
+    imports: [FileInputAccessorModule]
+})
+class NgModelHostComponent {
+    files: ICustomFile[] | null = null;
+    size: number | undefined;
+}
+
+@Component({
+    template: `
+        <form [formGroup]="form">
+            <input type="file" multiple
+                   formControlName="files"
+                   [size]="size"/>
+        </form>
+    `,
+    imports: [FileInputAccessorModule]
+})
+class FormControlNameHostComponent {
+    readonly files = new FormControl<ICustomFile[] | null>(null);
+    readonly form = new FormGroup({files: this.files});
+    size: number | undefined;
 }
 
 
@@ -526,6 +555,100 @@ describe('FileInputAccessor', () => {
             expect(host.control.errors?.maxWidth).toBe(true);
             expect(host.control.errors?.imageWidth).toBe(true);
         });
+    });
+});
+
+
+describe('FileInputAccessor with ngModel', () => {
+    let fixture: ComponentFixture<NgModelHostComponent>;
+    let host: NgModelHostComponent;
+    let ngModel: NgModel;
+    let inputEl: HTMLInputElement;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [NgModelHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(NgModelHostComponent);
+        host = fixture.componentInstance;
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const debugEl = fixture.debugElement.query(By.directive(NgModel));
+        ngModel = debugEl.injector.get(NgModel);
+        inputEl = debugEl.nativeElement;
+    });
+
+    it('attaches to an input[type=file] bound with ngModel', () => {
+        const directive = fixture.debugElement.query(By.directive(FileInputAccessor));
+
+        expect(directive).toBeTruthy();
+        expect(directive.nativeElement).toBe(inputEl);
+    });
+
+    it('writes the selected files to the model when the input fires change', () => {
+        selectFiles(inputEl, [makeTextFile('hello.txt', 'hi')]);
+
+        expect(host.files?.length).toBe(1);
+        expect(host.files?.[0].name).toBe('hello.txt');
+        expect(host.files?.[0].errors).toEqual({});
+    });
+
+    it('reports validation errors through the ngModel control', () => {
+        host.size = 5;
+        fixture.detectChanges();
+
+        selectFiles(inputEl, [makeTextFile('big.txt', 'too long')]);
+
+        expect(ngModel.invalid).toBe(true);
+        expect(ngModel.errors?.fileSize).toBe(true);
+    });
+});
+
+
+describe('FileInputAccessor with formControlName', () => {
+    let fixture: ComponentFixture<FormControlNameHostComponent>;
+    let host: FormControlNameHostComponent;
+    let inputEl: HTMLInputElement;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [FormControlNameHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(FormControlNameHostComponent);
+        host = fixture.componentInstance;
+        fixture.detectChanges();
+
+        inputEl = fixture.debugElement.query(By.css('input[type=file]')).nativeElement;
+    });
+
+    it('attaches to an input[type=file] bound with formControlName', () => {
+        const directive = fixture.debugElement.query(By.directive(FileInputAccessor));
+
+        expect(directive).toBeTruthy();
+        expect(directive.nativeElement).toBe(inputEl);
+    });
+
+    it('writes the selected files to the named control when the input fires change', () => {
+        selectFiles(inputEl, [makeTextFile('hello.txt', 'hi')]);
+
+        expect(host.files.value?.length).toBe(1);
+        expect(host.files.value?.[0].name).toBe('hello.txt');
+        expect(host.files.value?.[0].errors).toEqual({});
+        expect(host.form.value.files).toBe(host.files.value);
+    });
+
+    it('reports validation errors on the named control and the parent group', () => {
+        host.size = 5;
+        fixture.detectChanges();
+
+        selectFiles(inputEl, [makeTextFile('big.txt', 'too long')]);
+
+        expect(host.files.invalid).toBe(true);
+        expect(host.files.errors?.fileSize).toBe(true);
+        expect(host.form.invalid).toBe(true);
     });
 });
 
