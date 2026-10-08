@@ -75,12 +75,36 @@
             "buildTarget": "file-input:build"
           }
         },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "file-input:test-build",
+            "tsConfig": "src/tsconfig.spec.json",
+            "runner": "vitest",
+            "runnerConfig": "vitest.config.ts",
+            "include": [
+              "src/**/*.spec.ts"
+            ]
+          }
+        },
+        "test-build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/test.ts",
+            "tsConfig": "src/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "lintFilePatterns": [
               "src/**/*.ts",
-              "src/**/*.html"
+              "src/**/*.html",
+              "testing/**/*.ts"
             ]
           }
         }
@@ -111,7 +135,7 @@
             "buildTarget": "file-input-accessor:test-build",
             "tsConfig": "projects/file-input-accessor/tsconfig.spec.json",
             "runner": "vitest",
-            "runnerConfig": "projects/file-input-accessor/vitest.config.ts",
+            "runnerConfig": "vitest.config.ts",
             "include": [
               "projects/file-input-accessor/src/**/*.spec.ts"
             ]

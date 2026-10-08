@@ -3,7 +3,8 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {Component} from '@angular/core';
 import {FormControl, ReactiveFormsModule, ValidationErrors} from '@angular/forms';
 import {By} from '@angular/platform-browser';
-import {filter, firstValueFrom, Observable} from 'rxjs';
+import {firstValueFrom, Observable} from 'rxjs';
+import {makePngFile, makeTextFile, selectFiles, settled} from '@testing/file-helpers';
 import {FileInputAccessor} from './file-input-accessor';
 import {FileInputAccessorModule} from './file-input-accessor.module';
 import {ICustomFile} from './interfaces';
@@ -153,7 +154,7 @@ describe('FileInputAccessor', () => {
         it('does not enrich files when withMeta is false', () => {
             host.withMeta = false;
             fixture.detectChanges();
-            const file = makeTextFile('a.txt', 'hi');
+            const file: ICustomFile = makeTextFile('a.txt', 'hi');
 
             accessor.onChange([file]);
 
@@ -166,7 +167,7 @@ describe('FileInputAccessor', () => {
         it('reads text content when withMeta is true and the file is text/*', async () => {
             host.withMeta = true;
             fixture.detectChanges();
-            const file = makeTextFile('hello.txt', 'hello world');
+            const file: ICustomFile = makeTextFile('hello.txt', 'hello world');
 
             accessor.onChange([file]);
 
@@ -178,7 +179,7 @@ describe('FileInputAccessor', () => {
         it('reads image dimensions and src when withMeta is true and the file is image/*', async () => {
             host.withMeta = true;
             fixture.detectChanges();
-            const file = await makePngFile(10, 20);
+            const file: ICustomFile = await makePngFile(10, 20);
 
             accessor.onChange([file]);
 
@@ -193,7 +194,7 @@ describe('FileInputAccessor', () => {
         it('does not enrich binary files', () => {
             host.withMeta = true;
             fixture.detectChanges();
-            const file = new File([new Uint8Array([1, 2, 3])], 'data.bin', {type: 'application/octet-stream'}) as ICustomFile;
+            const file: ICustomFile = new File([new Uint8Array([1, 2, 3])], 'data.bin', {type: 'application/octet-stream'});
 
             accessor.onChange([file]);
 
@@ -364,7 +365,7 @@ describe('FileInputAccessor', () => {
                 host.withMeta = true;
                 host.maxWidth = 5;
                 fixture.detectChanges();
-                const file = await makePngFile(10, 10);
+                const file: ICustomFile = await makePngFile(10, 10);
 
                 accessor.onChange([file]);
                 await awaitLoad(file.imgLoadReplay);
@@ -380,7 +381,7 @@ describe('FileInputAccessor', () => {
                 host.withMeta = true;
                 host.maxHeight = 5;
                 fixture.detectChanges();
-                const file = await makePngFile(5, 10);
+                const file: ICustomFile = await makePngFile(5, 10);
 
                 accessor.onChange([file]);
                 await awaitLoad(file.imgLoadReplay);
@@ -396,7 +397,7 @@ describe('FileInputAccessor', () => {
                 host.withMeta = true;
                 host.minWidth = 100;
                 fixture.detectChanges();
-                const file = await makePngFile(10, 10);
+                const file: ICustomFile = await makePngFile(10, 10);
 
                 accessor.onChange([file]);
                 await awaitLoad(file.imgLoadReplay);
@@ -412,7 +413,7 @@ describe('FileInputAccessor', () => {
                 host.withMeta = true;
                 host.minHeight = 100;
                 fixture.detectChanges();
-                const file = await makePngFile(10, 10);
+                const file: ICustomFile = await makePngFile(10, 10);
 
                 accessor.onChange([file]);
                 await awaitLoad(file.imgLoadReplay);
@@ -431,7 +432,7 @@ describe('FileInputAccessor', () => {
                 host.maxWidth = 100;
                 host.maxHeight = 100;
                 fixture.detectChanges();
-                const file = await makePngFile(10, 10);
+                const file: ICustomFile = await makePngFile(10, 10);
 
                 accessor.onChange([file]);
                 await awaitLoad(file.imgLoadReplay);
@@ -449,7 +450,7 @@ describe('FileInputAccessor', () => {
                 host.withMeta = false;
                 host.maxWidth = 1;
                 fixture.detectChanges();
-                const file = await makePngFile(10, 10);
+                const file: ICustomFile = await makePngFile(10, 10);
 
                 accessor.onChange([file]);
                 const result = await runValidate(accessor, host.control);
@@ -515,7 +516,7 @@ describe('FileInputAccessor', () => {
             host.withMeta = true;
             host.maxWidth = 5;
             fixture.detectChanges();
-            const file = await makePngFile(10, 10);
+            const file: ICustomFile = await makePngFile(10, 10);
 
             selectFiles(inputEl, [file]);
 
@@ -529,47 +530,8 @@ describe('FileInputAccessor', () => {
 });
 
 
-function makeTextFile(name: string, content: string = '', type: string = 'text/plain'): ICustomFile {
-    return new File([content], name, {type}) as ICustomFile;
-}
-
-function makePngFile(width: number, height: number): Promise<ICustomFile> {
-    return new Promise((resolve, reject) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            reject(new Error('2D canvas context unavailable'));
-            return;
-        }
-        ctx.fillStyle = '#f00';
-        ctx.fillRect(0, 0, width, height);
-        canvas.toBlob((blob) => {
-            if (!blob) {
-                reject(new Error('canvas.toBlob returned null'));
-                return;
-            }
-            resolve(new File([blob], `pic-${width}x${height}.png`, {type: 'image/png'}) as ICustomFile);
-        }, 'image/png');
-    });
-}
-
 function prepared(file: ICustomFile): PreparedFile {
     return Object.assign(file, {errors: {}});
-}
-
-function selectFiles(input: HTMLInputElement, files: File[]): void {
-    const transfer = new DataTransfer();
-    for (const file of files) {
-        transfer.items.add(file);
-    }
-    input.files = transfer.files;
-    input.dispatchEvent(new Event('change'));
-}
-
-function settled(control: FormControl): Promise<string> {
-    return firstValueFrom(control.statusChanges.pipe(filter((status) => status !== 'PENDING')));
 }
 
 function awaitLoad(replay: Observable<unknown> | undefined): Promise<unknown> {

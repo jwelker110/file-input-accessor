@@ -7,8 +7,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "npm run test:lib",
+    "test": "npm run test:lib && npm run test:app",
     "test:lib": "ng test file-input-accessor --watch false",
+    "test:app": "npm run build:lib && ng test file-input --watch false",
     "lint": "ng lint"
   },
   "private": true,

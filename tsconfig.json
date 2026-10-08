@@ -20,6 +20,9 @@
       ],
       "file-input-accessor/*": [
         "dist/file-input-accessor/*"
+      ],
+      "@testing/*": [
+        "testing/*"
       ]
     },
     "useDefineForClassFields": false
