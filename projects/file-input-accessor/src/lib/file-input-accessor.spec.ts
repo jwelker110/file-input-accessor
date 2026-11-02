@@ -1,30 +1,671 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {FileInputAccessorStubComponent} from '../testing/file-input-accessor-stub';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Component} from '@angular/core';
+import {FormControl, FormGroup, NgModel, ReactiveFormsModule, ValidationErrors} from '@angular/forms';
+import {By} from '@angular/platform-browser';
+import {firstValueFrom, Observable} from 'rxjs';
+import {makePngFile, makeTextFile, selectFiles, settled} from '@testing/file-helpers';
 import {FileInputAccessor} from './file-input-accessor';
+import {FileInputAccessorModule} from './file-input-accessor.module';
+import {ICustomFile} from './interfaces';
+
+type PreparedFile = ICustomFile & Required<Pick<ICustomFile, 'errors'>>;
+
+@Component({
+    template: `
+        <input type="file" multiple
+               [formControl]="control"
+               [size]="size"
+               [withMeta]="withMeta"
+               [allowedExt]="allowedExt"
+               [allowedTypes]="allowedTypes"
+               [maxHeight]="maxHeight"
+               [maxWidth]="maxWidth"
+               [minHeight]="minHeight"
+               [minWidth]="minWidth"/>
+    `,
+    imports: [ReactiveFormsModule, FileInputAccessorModule]
+})
+class HostComponent {
+    control = new FormControl();
+    size: number | undefined;
+    withMeta = false;
+    allowedExt: RegExp | string | string[] | undefined;
+    allowedTypes: RegExp | string | string[] | undefined;
+    maxHeight: number | undefined;
+    maxWidth: number | undefined;
+    minHeight: number | undefined;
+    minWidth: number | undefined;
+}
+
+@Component({
+    template: `
+        <input type="file" multiple
+               [(ngModel)]="files"
+               [size]="size"/>
+    `,
+    imports: [FileInputAccessorModule]
+})
+class NgModelHostComponent {
+    files: ICustomFile[] | null = null;
+    size: number | undefined;
+}
+
+@Component({
+    template: `
+        <form [formGroup]="form">
+            <input type="file" multiple
+                   formControlName="files"
+                   [size]="size"/>
+        </form>
+    `,
+    imports: [FileInputAccessorModule]
+})
+class FormControlNameHostComponent {
+    readonly files = new FormControl<ICustomFile[] | null>(null);
+    readonly form = new FormGroup({files: this.files});
+    size: number | undefined;
+}
 
 
 describe('FileInputAccessor', () => {
-    beforeEach(waitForAsync(() => {
-        TestBed.configureTestingModule({
-            declarations: [
-                FileInputAccessor,
-                FileInputAccessorStubComponent
-            ],
-            imports: [
-                FormsModule,
-                ReactiveFormsModule
-            ]
+    let fixture: ComponentFixture<HostComponent>;
+    let host: HostComponent;
+    let accessor: FileInputAccessor;
+    let inputEl: HTMLInputElement;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [HostComponent]
         }).compileComponents();
-    }));
+
+        fixture = TestBed.createComponent(HostComponent);
+        host = fixture.componentInstance;
+        fixture.detectChanges();
+
+        const debugEl = fixture.debugElement.query(By.directive(FileInputAccessor));
+        accessor = debugEl.injector.get(FileInputAccessor);
+        inputEl = debugEl.nativeElement;
+    });
 
 
-    it(`Should attach to input where type=file`, waitForAsync(() => {
-        const fixture = TestBed.createComponent(FileInputAccessorStubComponent);
-        const comp: FileInputAccessorStubComponent = fixture.debugElement.componentInstance;
-        expect(comp.accessor).toBeTruthy();
-    }));
+    describe('selector', () => {
+        it('attaches to an input[type=file] bound to a form control', () => {
+            expect(accessor).toBeTruthy();
+            expect(inputEl.tagName).toBe('INPUT');
+            expect(inputEl.type).toBe('file');
+        });
+    });
 
-    it(`Should`)
-    
+
+    describe('writeValue', () => {
+        it('resets the native input value', () => {
+            accessor.writeValue(null);
+
+            expect(inputEl.value).toBe('');
+        });
+    });
+
+
+    describe('registerOnTouched', () => {
+        it('invokes the registered callback on blur', () => {
+            let touched = false;
+            accessor.registerOnTouched(() => { touched = true; });
+
+            inputEl.dispatchEvent(new Event('blur'));
+
+            expect(touched).toBe(true);
+        });
+    });
+
+
+    describe('setDisabledState', () => {
+        it('disables the native input when called with true', () => {
+            accessor.setDisabledState(true);
+
+            expect(inputEl.disabled).toBe(true);
+        });
+
+        it('re-enables the native input when called with false', () => {
+            accessor.setDisabledState(true);
+            accessor.setDisabledState(false);
+
+            expect(inputEl.disabled).toBe(false);
+        });
+    });
+
+
+    describe('allowedExt anchoring', () => {
+        it('anchors a string pattern at the end of the file name', async () => {
+            host.allowedExt = '\\.txt';
+            fixture.detectChanges();
+            const matching = prepared(makeTextFile('note.txt'));
+            const middle = prepared(makeTextFile('note.txt.bak'));
+            host.control.setValue([matching, middle]);
+
+            const result = await runValidate(accessor, host.control);
+
+            expect(matching.errors.fileExt).toBeUndefined();
+            expect(middle.errors.fileExt).toBe(true);
+            expect(result.fileExt).toBe(true);
+        });
+
+        it('anchors every entry of an array pattern at the end of the file name', async () => {
+            host.allowedExt = ['\\.txt', '\\.md'];
+            fixture.detectChanges();
+            const endsTxt = prepared(makeTextFile('note.txt'));
+            const endsMd = prepared(makeTextFile('note.md', '', 'text/markdown'));
+            const middle = prepared(makeTextFile('note.txt.bak'));
+            host.control.setValue([endsTxt, endsMd, middle]);
+
+            const result = await runValidate(accessor, host.control);
+
+            expect(endsTxt.errors.fileExt).toBeUndefined();
+            expect(endsMd.errors.fileExt).toBeUndefined();
+            expect(middle.errors.fileExt).toBe(true);
+            expect(result.fileExt).toBe(true);
+        });
+    });
+
+
+    describe('onChange handler', () => {
+        it('emits the file array with errors initialized on each file', () => {
+            const file = makeTextFile('hello.txt');
+
+            accessor.onChange([file]);
+            const emitted: ICustomFile[] = host.control.value;
+
+            expect(emitted.length).toBe(1);
+            expect(emitted[0]).toBe(file);
+            expect(emitted[0].errors).toEqual({});
+        });
+
+        it('does not enrich files when withMeta is false', () => {
+            host.withMeta = false;
+            fixture.detectChanges();
+            const file: ICustomFile = makeTextFile('a.txt', 'hi');
+
+            accessor.onChange([file]);
+
+            expect(file.textLoadReplay).toBeUndefined();
+            expect(file.imgLoadReplay).toBeUndefined();
+            expect(file.isImg).toBeUndefined();
+            expect(file.textContent).toBeUndefined();
+        });
+
+        it('reads text content when withMeta is true and the file is text/*', async () => {
+            host.withMeta = true;
+            fixture.detectChanges();
+            const file: ICustomFile = makeTextFile('hello.txt', 'hello world');
+
+            accessor.onChange([file]);
+
+            expect(file.textLoadReplay).toBeTruthy();
+            await awaitLoad(file.textLoadReplay);
+            expect(file.textContent).toBe('hello world');
+        });
+
+        it('reads image dimensions and src when withMeta is true and the file is image/*', async () => {
+            host.withMeta = true;
+            fixture.detectChanges();
+            const file: ICustomFile = await makePngFile(10, 20);
+
+            accessor.onChange([file]);
+
+            expect(file.isImg).toBe(true);
+            expect(file.imgLoadReplay).toBeTruthy();
+            await awaitLoad(file.imgLoadReplay);
+            expect(file.imgWidth).toBe(10);
+            expect(file.imgHeight).toBe(20);
+            expect(file.imgSrc).toMatch(/^data:image\/png;base64,/);
+        });
+
+        it('does not enrich binary files', () => {
+            host.withMeta = true;
+            fixture.detectChanges();
+            const file: ICustomFile = new File([new Uint8Array([1, 2, 3])], 'data.bin', {type: 'application/octet-stream'});
+
+            accessor.onChange([file]);
+
+            expect(file.textLoadReplay).toBeUndefined();
+            expect(file.imgLoadReplay).toBeUndefined();
+            expect(file.isImg).toBeUndefined();
+        });
+    });
+
+
+    describe('validate', () => {
+        it('returns an empty errors object when the control has no value', async () => {
+            const result = await runValidate(accessor, host.control);
+
+            expect(result).toEqual({});
+        });
+
+        it('returns an empty errors object when the control is disabled', async () => {
+            host.size = 1;
+            fixture.detectChanges();
+            const file = prepared(makeTextFile('big.txt', 'too long'));
+            host.control.setValue([file]);
+            host.control.disable();
+
+            const result = await runValidate(accessor, host.control);
+
+            expect(result).toEqual({});
+        });
+
+
+        describe('size', () => {
+            it('flags files larger than the size limit', async () => {
+                host.size = 5;
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('big.txt', 'too long'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileSize).toBe(true);
+                expect(file.errors.fileSize).toBe(true);
+            });
+
+            it('does not flag files within the size limit', async () => {
+                host.size = 100;
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('ok.txt', 'ok'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileSize).toBeUndefined();
+                expect(file.errors.fileSize).toBeUndefined();
+            });
+        });
+
+
+        describe('allowedExt', () => {
+            it('flags files whose name does not match a string pattern', async () => {
+                host.allowedExt = '\\.txt';
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('foo.jpg', '', 'image/jpeg'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileExt).toBe(true);
+                expect(file.errors.fileExt).toBe(true);
+            });
+
+            it('passes files whose name matches a string pattern', async () => {
+                host.allowedExt = '\\.txt';
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('foo.txt'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileExt).toBeUndefined();
+                expect(file.errors.fileExt).toBeUndefined();
+            });
+
+            it('passes files matching one entry of an array pattern', async () => {
+                host.allowedExt = ['\\.txt', '\\.md'];
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('note.md', '', 'text/markdown'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileExt).toBeUndefined();
+            });
+
+            it('passes files matching a RegExp pattern', async () => {
+                host.allowedExt = /\.(txt|md)$/i;
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('note.md', '', 'text/markdown'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileExt).toBeUndefined();
+            });
+
+            it('skips ext validation when allowedExt is not set', async () => {
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('weird.qqq', '', 'application/octet-stream'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileExt).toBeUndefined();
+            });
+        });
+
+
+        describe('allowedTypes', () => {
+            it('flags files whose MIME type does not match a string pattern', async () => {
+                host.allowedTypes = 'image';
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('a.txt'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileType).toBe(true);
+                expect(file.errors.fileType).toBe(true);
+            });
+
+            it('passes files whose MIME type matches', async () => {
+                host.allowedTypes = 'text';
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('a.txt'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileType).toBeUndefined();
+                expect(file.errors.fileType).toBeUndefined();
+            });
+
+            it('passes files matching one entry of an array pattern', async () => {
+                host.allowedTypes = ['text', 'image'];
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('img.jpg', '', 'image/jpeg'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileType).toBeUndefined();
+            });
+
+            it('passes files matching a RegExp pattern', async () => {
+                host.allowedTypes = /^image\//;
+                fixture.detectChanges();
+                const file = prepared(makeTextFile('img.jpg', '', 'image/jpeg'));
+                host.control.setValue([file]);
+
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.fileType).toBeUndefined();
+            });
+        });
+
+
+        describe('image dimensions', () => {
+            it('flags images wider than maxWidth and sets the imageWidth alias', async () => {
+                host.withMeta = true;
+                host.maxWidth = 5;
+                fixture.detectChanges();
+                const file: ICustomFile = await makePngFile(10, 10);
+
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.maxWidth).toBe(true);
+                expect(result.imageWidth).toBe(true);
+                expect(file.errors?.maxWidth).toBe(true);
+                expect(file.errors?.imageWidth).toBe(true);
+            });
+
+            it('flags images taller than maxHeight and sets the imageHeight alias', async () => {
+                host.withMeta = true;
+                host.maxHeight = 5;
+                fixture.detectChanges();
+                const file: ICustomFile = await makePngFile(5, 10);
+
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.maxHeight).toBe(true);
+                expect(result.imageHeight).toBe(true);
+                expect(file.errors?.maxHeight).toBe(true);
+                expect(file.errors?.imageHeight).toBe(true);
+            });
+
+            it('flags images narrower than minWidth and sets the imageWidth alias', async () => {
+                host.withMeta = true;
+                host.minWidth = 100;
+                fixture.detectChanges();
+                const file: ICustomFile = await makePngFile(10, 10);
+
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.minWidth).toBe(true);
+                expect(result.imageWidth).toBe(true);
+                expect(file.errors?.minWidth).toBe(true);
+                expect(file.errors?.imageWidth).toBe(true);
+            });
+
+            it('flags images shorter than minHeight and sets the imageHeight alias', async () => {
+                host.withMeta = true;
+                host.minHeight = 100;
+                fixture.detectChanges();
+                const file: ICustomFile = await makePngFile(10, 10);
+
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.minHeight).toBe(true);
+                expect(result.imageHeight).toBe(true);
+                expect(file.errors?.minHeight).toBe(true);
+                expect(file.errors?.imageHeight).toBe(true);
+            });
+
+            it('passes images that fall within all bounds', async () => {
+                host.withMeta = true;
+                host.minWidth = 1;
+                host.minHeight = 1;
+                host.maxWidth = 100;
+                host.maxHeight = 100;
+                fixture.detectChanges();
+                const file: ICustomFile = await makePngFile(10, 10);
+
+                accessor.onChange([file]);
+                await awaitLoad(file.imgLoadReplay);
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.minWidth).toBeUndefined();
+                expect(result.minHeight).toBeUndefined();
+                expect(result.maxWidth).toBeUndefined();
+                expect(result.maxHeight).toBeUndefined();
+                expect(result.imageWidth).toBeUndefined();
+                expect(result.imageHeight).toBeUndefined();
+            });
+
+            it('skips image dimension checks when withMeta is false', async () => {
+                host.withMeta = false;
+                host.maxWidth = 1;
+                fixture.detectChanges();
+                const file: ICustomFile = await makePngFile(10, 10);
+
+                accessor.onChange([file]);
+                const result = await runValidate(accessor, host.control);
+
+                expect(result.maxWidth).toBeUndefined();
+                expect(result.imageWidth).toBeUndefined();
+            });
+        });
+
+
+        it('aggregates errors across multiple files while marking only the offending files', async () => {
+            host.size = 5;
+            host.allowedExt = '\\.txt';
+            fixture.detectChanges();
+            const bigJpg = prepared(makeTextFile('big.jpg', 'too long', 'image/jpeg'));
+            const smallTxt = prepared(makeTextFile('ok.txt', 'ok'));
+            host.control.setValue([bigJpg, smallTxt]);
+
+            const result = await runValidate(accessor, host.control);
+
+            expect(result.fileSize).toBe(true);
+            expect(result.fileExt).toBe(true);
+            expect(bigJpg.errors.fileSize).toBe(true);
+            expect(bigJpg.errors.fileExt).toBe(true);
+            expect(smallTxt.errors.fileSize).toBeUndefined();
+            expect(smallTxt.errors.fileExt).toBeUndefined();
+        });
+    });
+
+
+    describe('form integration', () => {
+        it('emits the selected files to the control when the input fires change', () => {
+            selectFiles(inputEl, [makeTextFile('hello.txt', 'hi')]);
+
+            const emitted: ICustomFile[] = host.control.value;
+            expect(emitted.length).toBe(1);
+            expect(emitted[0].name).toBe('hello.txt');
+            expect(emitted[0].errors).toEqual({});
+        });
+
+        it('leaves the control valid when the selected files pass every check', () => {
+            host.size = 100;
+            host.allowedExt = '\\.txt';
+            fixture.detectChanges();
+
+            selectFiles(inputEl, [makeTextFile('ok.txt', 'ok')]);
+
+            expect(host.control.valid).toBe(true);
+            expect(host.control.errors).toBeNull();
+        });
+
+        it('marks the control invalid through the form when a file exceeds the size limit', () => {
+            host.size = 5;
+            fixture.detectChanges();
+
+            selectFiles(inputEl, [makeTextFile('big.txt', 'too long')]);
+
+            expect(host.control.invalid).toBe(true);
+            expect(host.control.errors?.fileSize).toBe(true);
+        });
+
+        it('keeps the control pending until image bounds are checked, then reports the error', async () => {
+            host.withMeta = true;
+            host.maxWidth = 5;
+            fixture.detectChanges();
+            const file: ICustomFile = await makePngFile(10, 10);
+
+            selectFiles(inputEl, [file]);
+
+            expect(host.control.pending).toBe(true);
+            await settled(host.control);
+            expect(host.control.invalid).toBe(true);
+            expect(host.control.errors?.maxWidth).toBe(true);
+            expect(host.control.errors?.imageWidth).toBe(true);
+        });
+    });
 });
+
+
+describe('FileInputAccessor with ngModel', () => {
+    let fixture: ComponentFixture<NgModelHostComponent>;
+    let host: NgModelHostComponent;
+    let ngModel: NgModel;
+    let inputEl: HTMLInputElement;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [NgModelHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(NgModelHostComponent);
+        host = fixture.componentInstance;
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const debugEl = fixture.debugElement.query(By.directive(NgModel));
+        ngModel = debugEl.injector.get(NgModel);
+        inputEl = debugEl.nativeElement;
+    });
+
+    it('attaches to an input[type=file] bound with ngModel', () => {
+        const directive = fixture.debugElement.query(By.directive(FileInputAccessor));
+
+        expect(directive).toBeTruthy();
+        expect(directive.nativeElement).toBe(inputEl);
+    });
+
+    it('writes the selected files to the model when the input fires change', () => {
+        selectFiles(inputEl, [makeTextFile('hello.txt', 'hi')]);
+
+        expect(host.files?.length).toBe(1);
+        expect(host.files?.[0].name).toBe('hello.txt');
+        expect(host.files?.[0].errors).toEqual({});
+    });
+
+    it('reports validation errors through the ngModel control', () => {
+        host.size = 5;
+        fixture.detectChanges();
+
+        selectFiles(inputEl, [makeTextFile('big.txt', 'too long')]);
+
+        expect(ngModel.invalid).toBe(true);
+        expect(ngModel.errors?.fileSize).toBe(true);
+    });
+});
+
+
+describe('FileInputAccessor with formControlName', () => {
+    let fixture: ComponentFixture<FormControlNameHostComponent>;
+    let host: FormControlNameHostComponent;
+    let inputEl: HTMLInputElement;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [FormControlNameHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(FormControlNameHostComponent);
+        host = fixture.componentInstance;
+        fixture.detectChanges();
+
+        inputEl = fixture.debugElement.query(By.css('input[type=file]')).nativeElement;
+    });
+
+    it('attaches to an input[type=file] bound with formControlName', () => {
+        const directive = fixture.debugElement.query(By.directive(FileInputAccessor));
+
+        expect(directive).toBeTruthy();
+        expect(directive.nativeElement).toBe(inputEl);
+    });
+
+    it('writes the selected files to the named control when the input fires change', () => {
+        selectFiles(inputEl, [makeTextFile('hello.txt', 'hi')]);
+
+        expect(host.files.value?.length).toBe(1);
+        expect(host.files.value?.[0].name).toBe('hello.txt');
+        expect(host.files.value?.[0].errors).toEqual({});
+        expect(host.form.value.files).toBe(host.files.value);
+    });
+
+    it('reports validation errors on the named control and the parent group', () => {
+        host.size = 5;
+        fixture.detectChanges();
+
+        selectFiles(inputEl, [makeTextFile('big.txt', 'too long')]);
+
+        expect(host.files.invalid).toBe(true);
+        expect(host.files.errors?.fileSize).toBe(true);
+        expect(host.form.invalid).toBe(true);
+    });
+});
+
+
+function prepared(file: ICustomFile): PreparedFile {
+    return Object.assign(file, {errors: {}});
+}
+
+function awaitLoad(replay: Observable<unknown> | undefined): Promise<unknown> {
+    if (replay == null) {
+        throw new Error('expected the file to have a load replay subject');
+    }
+    return firstValueFrom(replay);
+}
+
+async function runValidate(accessor: FileInputAccessor, control: FormControl): Promise<ValidationErrors> {
+    const out = accessor.validate(control);
+    const errors = out instanceof Observable ? await firstValueFrom(out) : await out;
+    return errors ?? {};
+}

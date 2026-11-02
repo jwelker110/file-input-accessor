@@ -76,58 +76,35 @@
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "main": "src/test.ts",
-            "polyfills": "src/polyfills.ts",
+            "buildTarget": "file-input:test-build",
             "tsConfig": "src/tsconfig.spec.json",
-            "karmaConfig": "src/karma.conf.js",
-            "styles": [
-              "src/styles.css"
-            ],
-            "scripts": [],
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
+            "runner": "vitest",
+            "runnerConfig": "vitest.config.ts",
+            "include": [
+              "src/**/*.spec.ts"
+            ]
+          }
+        },
+        "test-build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/test.ts",
+            "tsConfig": "src/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
             ]
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "src/tsconfig.app.json",
-              "src/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        }
-      }
-    },
-    "file-input-e2e": {
-      "root": "e2e/",
-      "projectType": "application",
-      "architect": {
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "file-input:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "file-input:serve:production"
-            }
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": "e2e/tsconfig.e2e.json",
-            "exclude": [
-              "**/node_modules/**"
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html",
+              "testing/**/*.ts"
             ]
           }
         }
@@ -149,27 +126,40 @@
             "production": {
               "project": "projects/file-input-accessor/ng-package.prod.json",
               "tsConfig": "projects/file-input-accessor/tsconfig.lib.prod.json"
-}
+            }
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "main": "projects/file-input-accessor/src/test.ts",
+            "buildTarget": "file-input-accessor:test-build",
             "tsConfig": "projects/file-input-accessor/tsconfig.spec.json",
-            "karmaConfig": "projects/file-input-accessor/karma.conf.js"
+            "runner": "vitest",
+            "runnerConfig": "vitest.config.ts",
+            "include": [
+              "projects/file-input-accessor/src/**/*.spec.ts"
+            ]
+          }
+        },
+        "test-build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/file-input-accessor/src/test.ts",
+            "tsConfig": "projects/file-input-accessor/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "projects/file-input-accessor/tsconfig.lib.json",
-              "projects/file-input-accessor/tsconfig.spec.json"
+            "lintFilePatterns": [
+              "projects/file-input-accessor/**/*.ts",
+              "projects/file-input-accessor/**/*.html"
             ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "eslintConfig": "projects/file-input-accessor/eslint.config.cjs"
           }
         }
       }
