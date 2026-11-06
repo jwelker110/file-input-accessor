@@ -3,8 +3,8 @@ import {FileInputAccessor} from './file-input-accessor';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @NgModule({
-    declarations: [FileInputAccessor],
     imports: [
+        FileInputAccessor,
         FormsModule,
         ReactiveFormsModule
     ],

@@ -1,12 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
-import {ICustomFile} from 'file-input-accessor';
+import {NgClass} from '@angular/common';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ReactiveFormsModule, UntypedFormControl, UntypedFormGroup} from '@angular/forms';
+import {FileInputAccessor, ICustomFile} from 'file-input-accessor';
 
 @Component({
     selector: 'app-file-form',
     templateUrl: './file-form.component.html',
     styleUrls: ['./file-form.component.scss'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FileInputAccessor, NgClass, ReactiveFormsModule]
 })
 export class FileFormComponent implements OnInit {
 
@@ -75,9 +77,17 @@ export class FileFormComponent implements OnInit {
         this.minHeight = minHeight;
     }
 
-    updateValues(size, maxWidth, maxHeight, minWidth, minHeight, typeRegEx, extRegEx) {
-        this.updateSize(size);
-        this.updateDimensions(maxWidth, maxHeight, minWidth, minHeight);
+    updateValues(
+        size: string,
+        maxWidth: string,
+        maxHeight: string,
+        minWidth: string,
+        minHeight: string,
+        typeRegEx: string,
+        extRegEx: string
+    ) {
+        this.updateSize(Number(size));
+        this.updateDimensions(Number(maxWidth), Number(maxHeight), Number(minWidth), Number(minHeight));
         this.updateTypes(typeRegEx);
         this.updateExt(extRegEx);
         this.removeFiles();

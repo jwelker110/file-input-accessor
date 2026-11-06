@@ -17,7 +17,7 @@ type Pattern = RegExp | string | string[];
 @Directive({
     selector: 'input[type=file][formControl],input[type=file][formControlName],input[type=file][ngModel]',
     host: {
-        '(change)': 'onChange($event.target.files)',
+        '(change)': 'onInputChange()',
         '(blur)': 'onTouched()'
     },
     providers: [
@@ -31,8 +31,7 @@ type Pattern = RegExp | string | string[];
             useExisting: forwardRef(() => FileInputAccessor),
             multi: true
         }
-    ],
-    standalone: false
+    ]
 })
 export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
     readonly allowedTypes = input<Pattern>();
@@ -45,10 +44,14 @@ export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
     readonly minWidth = input<number>();
 
     private readonly renderer = inject(Renderer2);
-    private readonly elementRef = inject(ElementRef);
+    private readonly elementRef = inject<ElementRef<HTMLInputElement>>(ElementRef);
 
     onChange: (files: ICustomFile[] | FileList) => void = () => {};
     onTouched: () => void = () => {};
+
+    onInputChange(): void {
+        this.onChange(this.elementRef.nativeElement.files ?? []);
+    }
 
     writeValue(_value: unknown): void {
         this.renderer.setProperty(this.elementRef.nativeElement, 'value', null);
