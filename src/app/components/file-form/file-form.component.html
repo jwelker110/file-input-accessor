@@ -38,15 +38,18 @@
                [maxHeight]="maxHeight"
                [minWidth]="minWidth"
                [minHeight]="minHeight"
-               [formControl]="form.get('file')">
+               [formControl]="fileControl">
         <label for="file" class="custom-file-label">Choose File</label>
       </div>
     </div>
 
-    <div class="col-sm-6" [ngSwitch]="form.get('file').disabled">
+    <div class="col-sm-6">
       <button class="btn btn-primary mr-1" (click)="removeFiles()">Clear files</button>
-      <button *ngSwitchCase="false" class="btn btn-warning mr-1" (click)="disableFileControl()">Disable</button>
-      <button *ngSwitchCase="true" class="btn btn-success mr-1" (click)="enableFileControl()">Enable</button>
+      @if (fileControl.disabled) {
+        <button class="btn btn-success mr-1" (click)="enableFileControl()">Enable</button>
+      } @else {
+        <button class="btn btn-warning mr-1" (click)="disableFileControl()">Disable</button>
+      }
     </div>
 
     <div class="col-12 info-container">
@@ -54,18 +57,18 @@
     </div>
 
     <div class="col-6 error-container">
-      <div [ngClass]="{'text-danger': form.get('file').hasError('fileType')}">File type not allowed.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('fileExt')}">File extension not allowed.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('fileSize')}">File size exceeds maximum.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('fileType')}">File type not allowed.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('fileExt')}">File extension not allowed.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('fileSize')}">File size exceeds maximum.</div>
     </div>
 
     <div class="col-6 error-container">
-      <div [ngClass]="{'text-danger': form.get('file').hasError('imageWidth')}">Image does not meet width requirements.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('imageHeight')}">Image does not meet height requirements.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('maxWidth')}">Image too wide.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('maxHeight')}">Image too tall.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('minWidth')}">Image not wide enough.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('minHeight')}">Image not tall enough.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('imageWidth')}">Image does not meet width requirements.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('imageHeight')}">Image does not meet height requirements.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('maxWidth')}">Image too wide.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('maxHeight')}">Image too tall.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('minWidth')}">Image not wide enough.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('minHeight')}">Image not tall enough.</div>
     </div>
   </div>
 
@@ -97,8 +100,8 @@
       <div class="form-group">
         <label class="col-form-label" for="width">Min image width <a
             href="https://github.com/jwelker110/file-input-accessor/blob/master/CHANGELOG.md" target="_blank"><strong>(>=
-                                                                                                                      v8.1.0)</strong></a>&nbsp;<span
-            class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
+                                                                                                                      v8.1.0)</strong></a>&nbsp;@if (!withMeta) {<span
+            class="text-info">(requires file meta)</span>}</label>
         <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text"><span class="fa fa-arrows-h"></span></span>
@@ -113,8 +116,8 @@
       <div class="form-group">
         <label class="col-form-label" for="height">Min image height <a
             href="https://github.com/jwelker110/file-input-accessor/blob/master/CHANGELOG.md" target="_blank"><strong>(>=
-                                                                                                                      v8.1.0)</strong></a>&nbsp;<span
-            class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
+                                                                                                                      v8.1.0)</strong></a>&nbsp;@if (!withMeta) {<span
+            class="text-info">(requires file meta)</span>}</label>
         <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text"><span class="fa fa-arrows-v"></span></span>
@@ -129,7 +132,7 @@
 
     <div class="col-sm-6">
       <div class="form-group">
-        <label class="col-form-label" for="width">Max image width <span class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
+        <label class="col-form-label" for="width">Max image width @if (!withMeta) {<span class="text-info">(requires file meta)</span>}</label>
         <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text"><span class="fa fa-arrows-h"></span></span>
@@ -142,7 +145,7 @@
       </div>
 
       <div class="form-group">
-        <label class="col-form-label" for="height">Max image height <span class="text-info" *ngIf="!withMeta">(requires file meta)</span></label>
+        <label class="col-form-label" for="height">Max image height @if (!withMeta) {<span class="text-info">(requires file meta)</span>}</label>
         <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text"><span class="fa fa-arrows-v"></span></span>
@@ -203,12 +206,14 @@
   </div>
 
   <div class="row">
-    <ng-container *ngFor="let file of fileList">
+    @for (file of fileList; track file) {
       <div class="col-sm-6 col-md-4 col-lg-4">
         <div class="file-container">
           <div>{{file.name}}</div>
           <div>{{file.size}} bytes</div>
-          <div *ngIf="file.isImg">{{file.imgWidth}} x {{file.imgHeight}}px</div>
+          @if (file.isImg) {
+            <div>{{file.imgWidth}} x {{file.imgHeight}}px</div>
+          }
           <div class="error-container">
             <div [ngClass]="{'text-danger': file.errors?.fileType}">File type not allowed.</div>
             <div [ngClass]="{'text-danger': file.errors?.fileExt}">File extension not allowed.</div>
@@ -221,11 +226,15 @@
             <div [ngClass]="{'text-danger': file.errors?.minHeight}">Image not tall enough.</div>
           </div>
           <div class="file-contents">
-            <img *ngIf="file.imgSrc" [src]="file.imgSrc" />
-            <p *ngIf="file.textContent" [innerHtml]="file.textContent"></p>
+            @if (file.imgSrc) {
+              <img [src]="file.imgSrc" [alt]="file.name" />
+            }
+            @if (file.textContent) {
+              <p [innerHtml]="file.textContent"></p>
+            }
           </div>
         </div>
       </div>
-    </ng-container>
+    }
   </div>
 </div>

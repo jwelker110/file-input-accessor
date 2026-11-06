@@ -1,12 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup} from '@angular/forms';
-import {ICustomFile} from 'file-input-accessor';
+import {NgClass} from '@angular/common';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ReactiveFormsModule, UntypedFormControl, UntypedFormGroup} from '@angular/forms';
+import {FileInputAccessor, ICustomFile} from 'file-input-accessor';
 
 @Component({
     selector: 'app-file-form',
     templateUrl: './file-form.component.html',
     styleUrls: ['./file-form.component.scss'],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FileInputAccessor, NgClass, ReactiveFormsModule]
 })
 export class FileFormComponent implements OnInit {
 
@@ -21,20 +23,14 @@ export class FileFormComponent implements OnInit {
     minWidth = 400;
     minHeight = 300;
 
-    form: UntypedFormGroup;
-    fileControl: UntypedFormControl;
+    readonly fileControl = new UntypedFormControl('');
+    readonly form = new UntypedFormGroup({
+        file: this.fileControl
+    });
 
-    checkbox: UntypedFormControl;
-
-    constructor(private _fb: UntypedFormBuilder) {
-        this.form = _fb.group({
-            file: ['']
-        });
-        this.fileControl = <UntypedFormControl> this.form.get('file');
-    }
+    readonly checkbox = new UntypedFormControl(this.withMeta);
 
     ngOnInit() {
-        this.checkbox = new UntypedFormControl(this.withMeta);
         this.fileControl.valueChanges
             .subscribe((val) => {
                 console.log('%c-----FILE LIST CHANGED-----', 'background-color: #008351; color: #fff');
@@ -81,13 +77,19 @@ export class FileFormComponent implements OnInit {
         this.minHeight = minHeight;
     }
 
-    updateValues(size, maxWidth, maxHeight, minWidth, minHeight, typeRegEx, extRegEx) {
-        this.updateSize(size);
-        this.updateDimensions(maxWidth, maxHeight, minWidth, minHeight);
+    updateValues(
+        size: string,
+        maxWidth: string,
+        maxHeight: string,
+        minWidth: string,
+        minHeight: string,
+        typeRegEx: string,
+        extRegEx: string
+    ) {
+        this.updateSize(Number(size));
+        this.updateDimensions(Number(maxWidth), Number(maxHeight), Number(minWidth), Number(minHeight));
         this.updateTypes(typeRegEx);
         this.updateExt(extRegEx);
         this.removeFiles();
     }
 }
-
-

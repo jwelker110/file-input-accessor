@@ -1,10 +1,8 @@
-import {Directive, ElementRef, forwardRef, HostListener, Input, Renderer2} from '@angular/core';
+import {Directive, ElementRef, forwardRef, inject, input, Renderer2} from '@angular/core';
 import {
     AbstractControl,
     AsyncValidator,
-    AsyncValidatorFn,
     ControlValueAccessor,
-    UntypedFormControl,
     NG_ASYNC_VALIDATORS,
     NG_VALUE_ACCESSOR,
     ValidationErrors
@@ -14,9 +12,14 @@ import {forkJoin, fromEventPattern, Observable, of, ReplaySubject} from 'rxjs';
 import {first, map, shareReplay, take} from 'rxjs/operators';
 import {ICustomFile} from './interfaces';
 
+type Pattern = RegExp | string | string[];
 
 @Directive({
     selector: 'input[type=file][formControl],input[type=file][formControlName],input[type=file][ngModel]',
+    host: {
+        '(change)': 'onInputChange()',
+        '(blur)': 'onTouched()'
+    },
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -28,256 +31,217 @@ import {ICustomFile} from './interfaces';
             useExisting: forwardRef(() => FileInputAccessor),
             multi: true
         }
-    ],
-    standalone: false
+    ]
 })
 export class FileInputAccessor implements ControlValueAccessor, AsyncValidator {
-    @Input() allowedTypes: RegExp | string | string[];
+    readonly allowedTypes = input<Pattern>();
+    readonly allowedExt = input<Pattern>();
+    readonly size = input<number>();
+    readonly withMeta = input<boolean>();
+    readonly maxHeight = input<number>();
+    readonly maxWidth = input<number>();
+    readonly minHeight = input<number>();
+    readonly minWidth = input<number>();
 
-    @Input() size: number;
+    private readonly renderer = inject(Renderer2);
+    private readonly elementRef = inject<ElementRef<HTMLInputElement>>(ElementRef);
 
-    @Input() withMeta: boolean;
+    onChange: (files: ICustomFile[] | FileList) => void = () => {};
+    onTouched: () => void = () => {};
 
-    @Input() maxHeight: number;
-
-    @Input() maxWidth: number;
-
-    @Input() minHeight: number;
-
-    @Input() minWidth: number;
-
-    @Input()
-    set allowedExt(value: RegExp | string | string[]) {
-        if (typeof value === 'string') {
-            value = value + '$';
-        }
-        if (value instanceof Array) {
-            value = value.join('|') + '$';
-        }
-        this._allowedExt = value;
+    onInputChange(): void {
+        this.onChange(this.elementRef.nativeElement.files ?? []);
     }
 
-    get allowedExt(): RegExp | string | string[] {
-        return this._allowedExt;
+    writeValue(_value: unknown): void {
+        this.renderer.setProperty(this.elementRef.nativeElement, 'value', null);
     }
 
-    validator: AsyncValidatorFn;
-
-    private _allowedExt: RegExp | string | string[];
-
-    @HostListener('change', ['$event.target.files']) onChange = (_: any) => {};
-    @HostListener('blur') onTouched = () => {};
-
-    constructor(private _renderer: Renderer2, private _elementRef: ElementRef) {
-        this.validator = this.generateAsyncValidator();
+    registerOnChange(fn: (files: ICustomFile[]) => void): void {
+        this.onChange = this.buildOnChange(fn);
     }
 
-    writeValue(value: any) {
-        this._renderer.setProperty(this._elementRef.nativeElement, 'value', null);
+    registerOnTouched(fn: () => void): void {
+        this.onTouched = fn;
     }
-
-    registerOnChange(fn: (_: any) => {}): void {
-        this.onChange = this.onChangeGenerator(fn);
-    }
-
-    registerOnTouched(fn: () => {}): void {}
 
     setDisabledState(isDisabled: boolean): void {
-        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
+        this.renderer.setProperty(this.elementRef.nativeElement, 'disabled', isDisabled);
     }
 
-    validate(c: AbstractControl): Observable<ValidationErrors | null> | Promise<ValidationErrors | null> {
-        return this.validator(c);
-    }
+    validate(control: AbstractControl): Observable<ValidationErrors | null> {
+        const files: ICustomFile[] | null = control.value;
+        if (!files || !files.length || control.disabled) {
+            return of({});
+        }
 
-    /**
-     * Generator method that I used to move the code for the AsyncValidator down here so it didn't
-     * get in my way, way up there ^.
-     */
-    private generateAsyncValidator(): AsyncValidatorFn {
-        return (c: UntypedFormControl): Observable<ValidationErrors> => {
-            if (!c.value || !c.value.length || c.disabled) return of({});
+        const errors: ValidationErrors = {};
+        const pendingImageChecks: Observable<unknown>[] = [];
+        const maxSize = this.size();
+        const allowedExt = this.allowedExt();
+        const allowedTypes = this.allowedTypes();
+        const hasImageBounds = !!(this.maxWidth() || this.maxHeight() || this.minWidth() || this.minHeight());
 
-            const errors: ValidationErrors = {};
-            const loaders: ReplaySubject<ProgressEvent>[] = [];
-
-            for (const f of c.value) {
-                if (this.size && this.size < f.size) {
-                    f.errors.fileSize = true;
-                    errors.fileSize = true;
-                }
-
-                if (f.isImg && (this.maxWidth || this.maxHeight || this.minWidth || this.minHeight)) {
-                    loaders.push(
-                        f.imgLoadReplay
-                            .pipe(
-                                take(1),
-                                map((e: ProgressEvent) => {
-                                    const minWidthError = this.minWidth && f.imgWidth < this.minWidth;
-                                    const minHeightError = this.minHeight && f.imgHeight < this.minHeight;
-                                    const maxWidthError = this.maxWidth && f.imgWidth > this.maxWidth;
-                                    const maxHeightError = this.maxHeight && f.imgHeight > this.maxHeight;
-
-                                    if (minWidthError) {
-                                        f.errors.minWidth = true;
-                                        errors.minWidth = true;
-                                    }
-
-                                    if (minHeightError) {
-                                        f.errors.minHeight = true;
-                                        errors.minHeight = true;
-                                    }
-
-                                    if (maxWidthError) {
-                                        f.errors.maxWidth = true;
-                                        errors.maxWidth = true;
-                                    }
-
-                                    if (maxHeightError) {
-                                        f.errors.maxHeight = true;
-                                        errors.maxHeight = true;
-                                    }
-
-                                    /** will be @deprecated **/
-                                    if (minWidthError || maxWidthError) {
-                                        f.errors.imageWidth = true;
-                                        errors.imageWidth = true;
-                                    }
-
-                                    /** will be @deprecated **/
-                                    if (minHeightError || maxHeightError) {
-                                        f.errors.imageHeight = true;
-                                        errors.imageHeight = true;
-                                    }
-
-                                    return e;
-                                }))
-                    );
-                }
-
-                if (!this.allowedExt && !this.allowedTypes) continue;
-
-                const extP = this.generateRegExp(this.allowedExt);
-                const typeP = this.generateRegExp(this.allowedTypes);
-
-                if (extP && !extP.test(f.name)) {
-                    f.errors.fileExt = true;
-                    errors.fileExt = true;
-                }
-
-                if (typeP && !typeP.test(f.type)) {
-                    f.errors.fileType = true;
-                    errors.fileType = true;
-                }
+        for (const file of files) {
+            const fileErrors = file.errors ??= {};
+            if (maxSize && file.size > maxSize) {
+                fileErrors.fileSize = true;
+                errors.fileSize = true;
             }
-            if (loaders.length) {
-                return forkJoin(...loaders).pipe(map(() => errors));
+            // RegExp is recreated per file because patterns produced from `[]` carry the `g`
+            // flag, whose `lastIndex` state would otherwise leak across files.
+            const extPattern = this.toRegExp(allowedExt, true);
+            const typePattern = this.toRegExp(allowedTypes, false);
+            if (extPattern && !extPattern.test(file.name)) {
+                fileErrors.fileExt = true;
+                errors.fileExt = true;
             }
-            return of(errors);
-        };
+            if (typePattern && !typePattern.test(file.type)) {
+                fileErrors.fileType = true;
+                errors.fileType = true;
+            }
+            if (hasImageBounds && file.isImg && file.imgLoadReplay) {
+                pendingImageChecks.push(
+                    file.imgLoadReplay.pipe(
+                        take(1),
+                        map(() => this.applyImageBoundErrors(file, errors))
+                    )
+                );
+            }
+        }
+
+        if (pendingImageChecks.length) {
+            return forkJoin(pendingImageChecks).pipe(map(() => errors));
+        }
+        return of(errors);
     }
 
-    /**
-     * Generator method that returns an onChange handler
-     */
-    private onChangeGenerator(fn: (_: any) => {}): (_: ICustomFile[]) => void {
-        return (files: ICustomFile[]) => {
-            const fileArr: File[] = [];
+    private buildOnChange(fn: (files: ICustomFile[]) => void): (files: ICustomFile[] | FileList) => void {
+        return (files) => {
+            const withMeta = this.withMeta();
+            const fileArr: ICustomFile[] = [];
 
-            for (const f of files) {
-                if (this.withMeta && FileReader) {
-                    const fr = new FileReader();
-                    this.generateFileMeta(f, fr);
+            for (const file of Array.from(files) as ICustomFile[]) {
+                file.errors = {};
+                if (withMeta) {
+                    this.generateFileMeta(file);
                 }
-                f.errors = {};
-                fileArr.push(f);
+                fileArr.push(file);
             }
             fn(fileArr);
         };
     }
 
-    private generateRegExp(pattern: RegExp | string | string[]): RegExp | null {
+    private applyImageBoundErrors(file: ICustomFile, errors: ValidationErrors): void {
+        const {imgWidth, imgHeight} = file;
+        if (imgWidth == null || imgHeight == null) return;
+
+        const fileErrors = file.errors ??= {};
+        const minW = this.minWidth();
+        const minH = this.minHeight();
+        const maxW = this.maxWidth();
+        const maxH = this.maxHeight();
+
+        const minWidthError = !!minW && imgWidth < minW;
+        const minHeightError = !!minH && imgHeight < minH;
+        const maxWidthError = !!maxW && imgWidth > maxW;
+        const maxHeightError = !!maxH && imgHeight > maxH;
+
+        if (minWidthError) {
+            fileErrors.minWidth = true;
+            errors.minWidth = true;
+        }
+        if (minHeightError) {
+            fileErrors.minHeight = true;
+            errors.minHeight = true;
+        }
+        if (maxWidthError) {
+            fileErrors.maxWidth = true;
+            errors.maxWidth = true;
+        }
+        if (maxHeightError) {
+            fileErrors.maxHeight = true;
+            errors.maxHeight = true;
+        }
+
+        // imageWidth/imageHeight are deprecated aliases kept for backwards compatibility.
+        if (minWidthError || maxWidthError) {
+            fileErrors.imageWidth = true;
+            errors.imageWidth = true;
+        }
+        if (minHeightError || maxHeightError) {
+            fileErrors.imageHeight = true;
+            errors.imageHeight = true;
+        }
+    }
+
+    private toRegExp(pattern: Pattern | undefined, anchorAtEnd: boolean): RegExp | null {
         if (!pattern) return null;
+        if (pattern instanceof RegExp) return new RegExp(pattern);
 
-        if (pattern instanceof RegExp) {
-            return new RegExp(pattern);
-        } else if (typeof pattern === 'string') {
-            return new RegExp(pattern, 'ig');
-        } else if (pattern instanceof Array) {
-            return new RegExp(`(${pattern.join('|')})`, 'ig');
-        }
-        return null;
+        const body = Array.isArray(pattern) ? `(${pattern.join('|')})` : pattern;
+        return new RegExp(anchorAtEnd ? `${body}$` : body, 'ig');
     }
 
-    /**
-     * The ICustomFile has a ReplaySubject property for text / image files that will emit
-     * once the file has been loaded. Might get removed later since I haven't found a use for it yet.
-     */
-    private generateFileMeta(f: ICustomFile, fr: FileReader) {
-        if (f.type.match(/text.*/)) {
-            f.textLoadReplay = this.setText(f, fr);
-        } else if (f.type.match(/image.*/)) {
-            f.imgLoadReplay = this.setImage(f, fr);
+    private generateFileMeta(file: ICustomFile): void {
+        if (typeof FileReader === 'undefined') return;
+
+        const reader = new FileReader();
+        if (file.type.startsWith('text')) {
+            file.textLoadReplay = this.readText(file, reader);
+        } else if (file.type.startsWith('image')) {
+            file.imgLoadReplay = this.readImage(file, reader);
         }
     }
 
-    private setImage(f: ICustomFile, fr: FileReader): ReplaySubject<[Event, ProgressEvent]> {
-        f.isImg = true;
+    private readImage(file: ICustomFile, reader: FileReader): ReplaySubject<[Event, ProgressEvent]> {
+        file.isImg = true;
 
         const img = new Image();
 
         const imgLoadObs = fromEventPattern<Event>(
-            ((handler: any) => img.addEventListener('load', handler)),
-            ((handler: any) => img.removeEventListener('load', handler))
-        ).pipe(
-            take(1),
-            shareReplay()
-        );
+            (handler) => img.addEventListener('load', handler),
+            (handler) => img.removeEventListener('load', handler)
+        ).pipe(take(1), shareReplay(1));
 
         const frLoadObs = fromEventPattern<ProgressEvent>(
-            ((handler: any) => fr.addEventListener('load', handler)),
-            ((handler: any) => fr.removeEventListener('load', handler))
-        ).pipe(
-            take(1),
-            shareReplay()
-        );
+            (handler) => reader.addEventListener('load', handler),
+            (handler) => reader.removeEventListener('load', handler)
+        ).pipe(take(1), shareReplay(1));
 
-        const onloadReplay = new ReplaySubject<[Event, ProgressEvent]>(1);
-        forkJoin([imgLoadObs, frLoadObs]).pipe(first()).subscribe(onloadReplay);
+        const onLoadReplay = new ReplaySubject<[Event, ProgressEvent]>(1);
+        forkJoin([imgLoadObs, frLoadObs]).pipe(first()).subscribe(onLoadReplay);
 
-        imgLoadObs.pipe(first()).subscribe(() => {
-            f.imgHeight = img.height;
-            f.imgWidth = img.width;
+        imgLoadObs.subscribe(() => {
+            file.imgHeight = img.height;
+            file.imgWidth = img.width;
         });
 
-        frLoadObs.pipe(first()).subscribe(() => {
-            f.imgSrc = fr.result + '';
-            img.src = fr.result + '';
+        frLoadObs.subscribe(() => {
+            const src = String(reader.result);
+            file.imgSrc = src;
+            img.src = src;
         });
 
-        fr.readAsDataURL(f);
+        reader.readAsDataURL(file);
 
-        return onloadReplay;
+        return onLoadReplay;
     }
 
-    private setText(f: ICustomFile, fr: FileReader): ReplaySubject<ProgressEvent> {
+    private readText(file: ICustomFile, reader: FileReader): ReplaySubject<ProgressEvent> {
         const frLoadObs = fromEventPattern<ProgressEvent>(
-            ((handler: any) => fr.addEventListener('load', handler)),
-            ((handler: any ) => fr.removeEventListener('load', handler))
-        ).pipe(
-            take(1),
-            shareReplay()
-        );
+            (handler) => reader.addEventListener('load', handler),
+            (handler) => reader.removeEventListener('load', handler)
+        ).pipe(take(1), shareReplay(1));
 
-        const onloadReplay = new ReplaySubject<ProgressEvent>(1);
-        frLoadObs.subscribe(onloadReplay);
-
-        frLoadObs.pipe(first()).subscribe(() => {
-            f.textContent = fr.result + '';
+        const onLoadReplay = new ReplaySubject<ProgressEvent>(1);
+        frLoadObs.subscribe(onLoadReplay);
+        frLoadObs.subscribe(() => {
+            file.textContent = String(reader.result);
         });
 
-        fr.readAsText(f);
+        reader.readAsText(file);
 
-        return onloadReplay;
+        return onLoadReplay;
     }
 }

@@ -1,3 +1,17 @@
+# 22.0.0 (2026-11-02)
+* Update the Angular dependencies to Angular 22.
+* `FileInputAccessor` is now a standalone directive and can be added directly to a component's `imports`. `FileInputAccessorModule` remains available and re-exports the directive together with `FormsModule` and `ReactiveFormsModule`, so existing `NgModule` consumers need no changes.
+* Modernized `FileInputAccessor` internals to current Angular idioms: signal `input()`s, `inject()`, and `host` metadata instead of decorators.
+* Template bindings, validation behavior, and error keys are unchanged.
+* **Breaking (narrow case)**: reading the directive's inputs programmatically (e.g. `accessor.allowedExt`) now returns a signal function instead of a plain value. Call it (`accessor.allowedExt()`) to get the value. The `allowedExt` value is also no longer mutated on assignment - end-of-name anchoring (`$`) is applied when the pattern is evaluated, so reading the input back returns exactly what was set.
+* `registerOnTouched` now stores its callback, so the control is properly marked touched on blur.
+* `validate` initializes a missing `errors` object on each file instead of throwing when a file set programmatically fails a check.
+* Library unit tests run on vitest (browser mode via Playwright) instead of Karma.
+* Linting migrated from tslint/codelyzer to ESLint with `angular-eslint`.
+* Removed the Protractor e2e project and its dependencies.
+* Removed the demo app's unused Karma test setup.
+* Added package-level tests: the demo app's vitest suite consumes the built package from `dist/` through the real file input. `npm test` runs the library suite and then the demo suite.
+
 # 21.0.0 (2025-12-25)
 * Update the Angular dependencies to latest version.
 * Updated README - updated links and removed file upload example.

@@ -1,7 +1,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
     "importHelpers": true,
     "esModuleInterop": true,
     "outDir": "./dist/out-tsc",
@@ -12,14 +11,17 @@
     "experimentalDecorators": true,
     "target": "ES2022",
     "typeRoots": [
-      "node_modules/@types"
+      "./node_modules/@types"
     ],
     "paths": {
       "file-input-accessor": [
-        "dist/file-input-accessor"
+        "./dist/file-input-accessor"
       ],
       "file-input-accessor/*": [
-        "dist/file-input-accessor/*"
+        "./dist/file-input-accessor/*"
+      ],
+      "@testing/*": [
+        "./testing/*"
       ]
     },
     "useDefineForClassFields": false
