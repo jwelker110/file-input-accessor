@@ -38,7 +38,7 @@
                [maxHeight]="maxHeight"
                [minWidth]="minWidth"
                [minHeight]="minHeight"
-               [formControl]="form.get('file')">
+               [formControl]="fileControl">
         <label for="file" class="custom-file-label">Choose File</label>
       </div>
     </div>
@@ -57,18 +57,18 @@
     </div>
 
     <div class="col-6 error-container">
-      <div [ngClass]="{'text-danger': form.get('file').hasError('fileType')}">File type not allowed.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('fileExt')}">File extension not allowed.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('fileSize')}">File size exceeds maximum.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('fileType')}">File type not allowed.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('fileExt')}">File extension not allowed.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('fileSize')}">File size exceeds maximum.</div>
     </div>
 
     <div class="col-6 error-container">
-      <div [ngClass]="{'text-danger': form.get('file').hasError('imageWidth')}">Image does not meet width requirements.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('imageHeight')}">Image does not meet height requirements.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('maxWidth')}">Image too wide.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('maxHeight')}">Image too tall.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('minWidth')}">Image not wide enough.</div>
-      <div [ngClass]="{'text-danger': form.get('file').hasError('minHeight')}">Image not tall enough.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('imageWidth')}">Image does not meet width requirements.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('imageHeight')}">Image does not meet height requirements.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('maxWidth')}">Image too wide.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('maxHeight')}">Image too tall.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('minWidth')}">Image not wide enough.</div>
+      <div [ngClass]="{'text-danger': fileControl.hasError('minHeight')}">Image not tall enough.</div>
     </div>
   </div>
 

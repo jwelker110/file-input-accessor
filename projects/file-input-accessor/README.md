@@ -39,11 +39,26 @@ As a general rule:
    
    ```npm i file-input-accessor```
 
-2. Import the FileInputAccessorModule.
-    
+2. Import the `FileInputAccessor` directive into your standalone component, alongside the forms module you use.
+
+   ```typescript
+    import {Component} from '@angular/core';
+    import {ReactiveFormsModule} from '@angular/forms';
+    import {FileInputAccessor} from 'file-input-accessor';
+
+    @Component({
+        selector: 'app-file-upload',
+        templateUrl: './file-upload.component.html',
+        imports: [ReactiveFormsModule, FileInputAccessor]
+    })
+    export class FileUploadComponent {}
+   ```
+
+   If your app still uses `NgModule`, import `FileInputAccessorModule` instead. It exports the directive together with `FormsModule` and `ReactiveFormsModule`.
+
    ```typescript
     import {BrowserModule} from '@angular/platform-browser';
-    import {FileInputAccessorModule} from "file-input-accessor";
+    import {FileInputAccessorModule} from 'file-input-accessor';
 
     @NgModule({
         declarations: [

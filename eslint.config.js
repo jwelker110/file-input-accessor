@@ -36,7 +36,7 @@ module.exports = defineConfig([
         },
       ],
       // The library is published as an NgModule and the demo consumes it that way.
-      '@angular-eslint/prefer-standalone': 'off',
+      '@angular-eslint/prefer-on-push-component-change-detection': 'off',
 
       '@typescript-eslint/member-ordering': [
         'error',

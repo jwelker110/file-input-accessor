@@ -1,9 +1,4 @@
-# This file is currently used by autoprefixer to adjust CSS to support the below specified browsers
-# For additional information regarding the format and rule options, please see:
+# Browsers targeted by the demo build. Angular derives its own support list from the same
+# Baseline query, so keeping this in step with it avoids compiling for browsers Angular drops.
 # https://github.com/browserslist/browserslist#queries
-# For IE 9-11 support, please uncomment the last line of the file and adjust as needed
-> 0.5%
-last 2 versions
-Firefox ESR
-not dead
-# IE 9-11
+baseline widely available

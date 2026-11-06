@@ -1,6 +1,6 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {FormControl, FormGroup, NgModel, ReactiveFormsModule, ValidationErrors} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {firstValueFrom, Observable} from 'rxjs';
@@ -24,7 +24,8 @@ type PreparedFile = ICustomFile & Required<Pick<ICustomFile, 'errors'>>;
                [minHeight]="minHeight"
                [minWidth]="minWidth"/>
     `,
-    imports: [ReactiveFormsModule, FileInputAccessorModule]
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ReactiveFormsModule, FileInputAccessor]
 })
 class HostComponent {
     control = new FormControl();
@@ -44,6 +45,7 @@ class HostComponent {
                [(ngModel)]="files"
                [size]="size"/>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FileInputAccessorModule]
 })
 class NgModelHostComponent {
@@ -59,6 +61,7 @@ class NgModelHostComponent {
                    [size]="size"/>
         </form>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FileInputAccessorModule]
 })
 class FormControlNameHostComponent {

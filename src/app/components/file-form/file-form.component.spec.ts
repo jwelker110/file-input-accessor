@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {FileInputAccessor, FileInputAccessorModule} from 'file-input-accessor';
+import {FileInputAccessor} from 'file-input-accessor';
 import {makePngFile, makeTextFile, selectFiles, settled} from '@testing/file-helpers';
 
 import {FileFormComponent} from './file-form.component';
@@ -15,8 +15,7 @@ describe('FileFormComponent (consuming the built package)', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [FileFormComponent],
-            imports: [FileInputAccessorModule]
+            imports: [FileFormComponent]
         }).compileComponents();
 
         fixture = TestBed.createComponent(FileFormComponent);

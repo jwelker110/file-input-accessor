@@ -1,4 +1,6 @@
-# Unreleased
+# 22.0.0 (2026-11-02)
+* Update the Angular dependencies to Angular 22.
+* `FileInputAccessor` is now a standalone directive and can be added directly to a component's `imports`. `FileInputAccessorModule` remains available and re-exports the directive together with `FormsModule` and `ReactiveFormsModule`, so existing `NgModule` consumers need no changes.
 * Modernized `FileInputAccessor` internals to current Angular idioms: signal `input()`s, `inject()`, and `host` metadata instead of decorators.
 * Template bindings, validation behavior, and error keys are unchanged.
 * **Breaking (narrow case)**: reading the directive's inputs programmatically (e.g. `accessor.allowedExt`) now returns a signal function instead of a plain value. Call it (`accessor.allowedExt()`) to get the value. The `allowedExt` value is also no longer mutated on assignment - end-of-name anchoring (`$`) is applied when the pattern is evaluated, so reading the input back returns exactly what was set.
